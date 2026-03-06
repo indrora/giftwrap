@@ -1,0 +1,24 @@
+name: giftwrap
+env:
+  foo: bar
+  whatnot: This is a long string
+exec:
+  pre:
+    - echo "pre-exec global"
+  post:
+    - echo "post-exec global"
+targets:
+  default:
+    package: github.com/indrora/giftwrap
+    targets:
+    - linux/arm64
+    - linux/amd64
+    - darwin/arm64
+    - darwin/amd64
+    - windows/arm64
+    - windows/amd64
+    exec:
+      pre:
+        - echo "pre-exec for target"
+      post:
+        - echo "post-exec for target"
