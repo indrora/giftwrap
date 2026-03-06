@@ -5,6 +5,7 @@ package cmd
 
 import (
 	_ "embed"
+	"fmt"
 	"log"
 	"os"
 
@@ -18,20 +19,20 @@ import (
 // initCmd represents the init command
 var initCmd = &cobra.Command{
 	Use:   "init",
-	Short: "A brief description of your command",
+	Short: "Initialize a project",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
-	Run: run,
+	Run: doInit,
 }
 
 //go:embed "default.yml"
 var defaultBody []byte
 
-func run(cmd *cobra.Command, args []string) {
+func doInit(cmd *cobra.Command, args []string) {
 
 	data, err := os.ReadFile("go.mod")
 	if err != nil {
@@ -49,19 +50,29 @@ func run(cmd *cobra.Command, args []string) {
 
 	pp := project.Project{
 		Name: "MyProject",
-		Configurations: map[string]project.BuildConfig{
+		Targets: map[string]project.BuildConfig{
 			"default": project.BuildConfig{
 				Package: f.Module.Mod.Path,
-				Targets: types.StringOrSlice{"linux/arm64", "linux/amd64", "darwin/arm64", "darwin/amd64", "windows/arm64", "windows/amd64"},
+				Targets: types.CommandList{"linux/arm64", "linux/amd64", "darwin/arm64", "darwin/amd64", "windows/arm64", "windows/amd64"},
 			},
 		},
 	}
 
-	var dumper *yaml.Dumper
-	if dumper, err = yaml.NewDumper(os.Stdout, yaml.V4); err != nil {
-		return
+	// Write out the file
+	o, err := os.Create(*wrapfile)
+	if err != nil {
+		panic(err)
 	}
-	dumper.Dump(pp)
+	defer o.Close()
+
+	dumper, err := yaml.NewDumper(o, yaml.V4)
+	if err != nil {
+		panic(err)
+	}
+	if dumper.Dump(pp) != nil {
+		fmt.Println("Couldn't write wrapfile...")
+	}
+	dumper.Close()
 
 }
 

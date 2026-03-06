@@ -1,6 +1,9 @@
 name: "project"
 package: "."
 include: cheese.zip
+env:
+  foo: bar
+  whatnot: This is a long string
 exec:
   pre:
     - 'echo "Hello World"'

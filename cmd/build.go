@@ -6,22 +6,53 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/indrora/giftwrap/internal/builder"
+	"github.com/indrora/giftwrap/internal/runner"
 	"github.com/spf13/cobra"
 )
 
 // buildCmd represents the build command
 var buildCmd = &cobra.Command{
-	Use:   "build",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Use:     "build",
+	Short:   "Build the project",
+	Long:    `;)`,
+	Run:     doBuild,
+	PreRunE: LoadProject,
+}
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("build called")
-	},
+func doBuild(cmd *cobra.Command, args []string) {
+
+	if len(args) == 0 {
+		// use the default target
+
+		args = []string{globProject.DefaultTarget}
+	}
+
+	run := new(runner.ExecRunner)
+
+	builder, err := builder.NewBuilder(*globProject, *run)
+
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Start build")
+	if err := builder.Setup(); err != nil {
+		panic(err)
+	}
+
+	for _, v := range args {
+		fmt.Printf("Building target %s\n", v)
+		builder.BuildTarget(v)
+	}
+
+	fmt.Println("Tearing down build")
+	if err := builder.Teardown(); err != nil {
+		panic(err)
+	}
+
+	fmt.Println("Finished!")
+
 }
 
 func init() {

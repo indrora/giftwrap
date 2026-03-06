@@ -28,6 +28,16 @@ var rootCmd = &cobra.Command{
 		cmd.Help()
 
 	},
+
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		b, err := getWrapfile()
+		if err != nil {
+			panic(err)
+		}
+
+		*wrapfile = b
+
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -63,11 +73,12 @@ func getWrapfile() (string, error) {
 			if e == nil {
 				return s, nil
 			} else if !errors.Is(e, os.ErrNotExist) {
+				*wrapfile = s
 				return s, e
 			}
 		}
 	} else {
 		return *wrapfile, nil
 	}
-	return "", errors.New("no wrapfile found or specified")
+	return ".wrapfile", nil
 }
