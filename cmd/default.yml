@@ -1,0 +1,28 @@
+name: "project"
+package: "."
+include: cheese.zip
+exec:
+  pre:
+    - 'echo "Hello World"'
+    - touch foo
+    - zip butts
+    - ping "that girl"
+  post: 'echo "Goodbye, World"'
+config:
+  default:
+    package: "."
+    targets:
+      - linux/amd64
+      - linux/arm64
+      - windows/amd64
+      - darwin/amd64
+      - darwin/arm64
+    exec:
+      pre: 'echo "preexec default"'
+      post: 'echo "'
+  not-default:
+    package: "."
+    targets: plan9/amd64
+    include:
+      - butts/**
+      - cheese.txt
