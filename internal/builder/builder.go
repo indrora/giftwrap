@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/indrora/giftwrap/internal"
 	"github.com/indrora/giftwrap/internal/runner"
@@ -90,10 +91,14 @@ func (b *Builder) BuildTarget(target string) error {
 
 		buildpath := path.Join(b.proj.BuildDir, internal.Slugify(variantName))
 		os.MkdirAll(buildpath, os.ModePerm)
-		opts := b.runOpts.WithEnv(map[string]string{
-			"GOOS": variantName
+
+		varsplit := strings.SplitN(variantName, "/", 2)
+
+		opts := b.runOpts.WithSysEnv().WithEnv(map[string]string{
+			"GOOS":   varsplit[0],
+			"GOARCH": varsplit[1],
 		})
-		b.runner.RunArgs("go", []string{"build", "-o", buildpath, config.Package}, b.runOpts)
+		b.runner.RunArgs("go", []string{"build", "-o", buildpath, config.Package}, opts)
 
 		fmt.Printf("Building to path %s\n", buildpath)
 
