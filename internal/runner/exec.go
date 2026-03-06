@@ -31,9 +31,14 @@ func (r ExecRunner) RunArgs(c string, args []string, options Options) error {
 	process.Env = env
 	process.Stdout = options.Stdout
 	process.Stderr = options.Stderr
-	fmt.Println(process.String())
 
-	process.Start()
-	process.Wait()
+	if err := process.Start(); err != nil {
+		return ProcessFailedError{Cmd: c, Code: -1, Reason: err.Error()}
+	}
+
+	if err := process.Wait(); err != nil {
+		return ProcessFailedError{Cmd: process.String(), Code: process.ProcessState.ExitCode(), Reason: err.Error()}
+	}
+
 	return nil
 }
