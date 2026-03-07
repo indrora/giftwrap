@@ -2,6 +2,10 @@ name: giftwrap
 env:
   foo: bar
   whatnot: This is a long string
+include:
+  - LICENSE
+  - src: internal/**/
+    dest: src/
 exec:
   pre:
     - echo "pre-exec global"

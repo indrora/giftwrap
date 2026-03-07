@@ -9,6 +9,8 @@ require (
 	go.yaml.in/yaml/v4 v4.0.0-rc.4
 )
 
+require github.com/bmatcuk/doublestar/v4 v4.10.0 // indirect
+
 require (
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect

@@ -12,8 +12,9 @@ import (
 type Project struct {
 	// name of the project (slugified for release files)
 	Name string `yaml:"name"`
-	// Additional files to include in the release
-	AdditionalFiles types.CommandList `yaml:"include,omitempty"`
+	// Additional files to copy into each variant's output directory after build.
+	// Supports doublestar glob patterns. See types.FileSpec for YAML forms.
+	AdditionalFiles []types.FileSpec `yaml:"include,omitempty"`
 	// Environment variables to set during pre- and post-build commands.
 	Environment map[string]string `yaml:"env,omitempty"`
 	// Commands to run pre- and post-build
@@ -52,10 +53,8 @@ func (p *Project) ReifyConfig(target string) (*BuildConfig, error) {
 
 	buildconfig.Environment = envs
 
-	// Additional files is similar.
-	files := make(types.CommandList, len(p.AdditionalFiles)+len(buildconfig.AdditionalFiles))
-	files = append(p.AdditionalFiles, tgt.AdditionalFiles...)
-	buildconfig.AdditionalFiles = files
+	// Additional files: project-level entries come first, target entries append after.
+	buildconfig.AdditionalFiles = append(p.AdditionalFiles, tgt.AdditionalFiles...)
 
 	return buildconfig, nil
 }

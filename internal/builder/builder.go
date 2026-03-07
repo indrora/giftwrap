@@ -102,6 +102,14 @@ func (b *Builder) BuildTarget(target string) error {
 
 		fmt.Printf("Building to path %s\n", buildpath)
 
+		fmt.Println(config.AdditionalFiles)
+
+		if len(config.AdditionalFiles) > 0 {
+			if err := copyFiles(config.AdditionalFiles, buildpath, os.DirFS(".")); err != nil {
+				return fmt.Errorf("copying files for %s: %w", variantName, err)
+			}
+		}
+
 		config.Exec.PostExec.Run(b.runner, b.runOpts)
 
 	}
