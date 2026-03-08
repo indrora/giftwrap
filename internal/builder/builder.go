@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"runtime"
 	"strings"
 
 	"github.com/indrora/giftwrap/internal"
@@ -21,6 +22,7 @@ type Builder struct {
 	errWriter io.Writer
 	runner    runner.Runner
 	runOpts   runner.Options
+	Shell     string
 
 	realTargets map[string]project.BuildConfig
 }
@@ -29,6 +31,7 @@ func NewBuilder(p project.Project, r runner.Runner) (*Builder, error) {
 	b := &Builder{}
 	b.proj = p
 	b.runner = r
+	b.Shell = p.Shell.ForOS(runtime.GOOS)
 	b.runOpts = runner.NewOptions()
 
 	// reify all configurations
@@ -88,12 +91,15 @@ func (b *Builder) BuildTarget(target string) error {
 
 		varsplit := strings.SplitN(variantName, "/", 2)
 
-		opts := b.runOpts.WithSysEnv().WithEnv(map[string]string{
-			"GOOS":         varsplit[0],
-			"GOARCH":       varsplit[1],
-			"BUILD_PATH":   buildpath,
-			"BUILD_TARGET": target,
-		})
+		opts := b.runOpts.WithSysEnv().
+			WithShell(b.Shell).
+			WithEnv(config.Environment).
+			WithEnv(map[string]string{
+				"GOOS":         varsplit[0],
+				"GOARCH":       varsplit[1],
+				"BUILD_PATH":   buildpath,
+				"BUILD_TARGET": target,
+			})
 
 		fmt.Printf("Building target %s:%s\n", target, variantName)
 

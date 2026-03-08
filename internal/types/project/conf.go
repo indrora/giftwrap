@@ -19,6 +19,9 @@ type Project struct {
 	Environment map[string]string `yaml:"env,omitempty"`
 	// Commands to run pre- and post-build
 	Exec *BuildCmds `yaml:"exec,omitempty"`
+	// Shell configures which shell to use per OS when running pre/post commands.
+	// See ShellConfig for resolution order and YAML format.
+	Shell ShellConfig `yaml:"shell,omitempty"`
 	// Directory to place build artifacts
 	BuildDir      string `yaml:"buildPath,omitempty"`     // defaults to "build"
 	DistDir       string `yaml:"distPath,omitempty"`      // defaults to "dist"

@@ -3,6 +3,7 @@ package runner
 import (
 	"fmt"
 	"os/exec"
+	"runtime"
 	"strings"
 )
 
@@ -11,11 +12,16 @@ type ExecRunner struct {
 }
 
 func (r ExecRunner) Run(cmd string, options Options) error {
-	c, a, e := splitCommand(cmd)
-	if e != nil {
-		return e
+	shell := options.Shell
+	if shell == "" {
+		if runtime.GOOS == "windows" {
+			shell = "cmd /c"
+		} else {
+			shell = "sh -c"
+		}
 	}
-	return r.RunArgs(c, a, options)
+	parts := strings.Fields(shell)
+	return r.RunArgs(parts[0], append(parts[1:], cmd), options)
 }
 
 func (r ExecRunner) RunArgs(c string, args []string, options Options) error {
@@ -25,7 +31,8 @@ func (r ExecRunner) RunArgs(c string, args []string, options Options) error {
 
 	env := make([]string, 0, len(options.Env))
 	for k, v := range options.Env {
-		env = append(env, fmt.Sprintf("%s=%s", strings.ToUpper(k), v))
+
+		env = append(env, fmt.Sprintf("%s=%s", k, v))
 	}
 
 	process.Env = env

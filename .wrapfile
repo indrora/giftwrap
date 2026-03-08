@@ -4,8 +4,6 @@ env:
   whatnot: This is a long string
 include:
   - LICENSE
-  - src: internal/**
-    dest: src/
 exec:
   pre:
     - echo "pre-exec global"
@@ -13,6 +11,8 @@ exec:
     - echo "post-exec global"
 targets:
   default:
+    env:
+      foo: "asdfasdf"
     package: github.com/indrora/giftwrap
     targets:
     - linux/arm64
@@ -24,9 +24,7 @@ targets:
     exec:
       pre:
         - echo "pre-exec for target, building $GOOS + $GOARCH"
+        - echo "$WHATNOT"
       post:
         - echo "post-exec for target"
-        - >
-          echo "More things  here"
-          touch grass
-          say butts
+        - echo "foo is $FOO and whatnot is $WHATNOT"

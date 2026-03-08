@@ -32,6 +32,12 @@ func doBuild(cmd *cobra.Command, args []string) {
 
 	builder, err := builder.NewBuilder(*globProject, *run)
 
+	// Configure the shell override.
+
+	if shell != nil && *shell != "" {
+		builder.Shell = *shell
+	}
+
 	if err != nil {
 		panic(err)
 	}
@@ -55,6 +61,8 @@ func doBuild(cmd *cobra.Command, args []string) {
 
 }
 
+var shell *string
+
 func init() {
 	rootCmd.AddCommand(buildCmd)
 
@@ -67,4 +75,5 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// buildCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	shell = buildCmd.Flags().String("shell", "", "Specify the shell to use for building")
 }

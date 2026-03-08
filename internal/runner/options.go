@@ -9,6 +9,7 @@ import (
 
 type Options struct {
 	Env    map[string]string
+	Shell  string    // shell invocation, e.g. "sh -c" or "cmd /c"; empty = runtime default
 	Stdout io.Writer
 	Stderr io.Writer
 }
@@ -43,6 +44,11 @@ func (o Options) WithEnv(env map[string]string) Options {
 
 func (o Options) WithStdout(stdout io.Writer) Options {
 	o.Stdout = stdout
+	return o
+}
+
+func (o Options) WithShell(shell string) Options {
+	o.Shell = shell
 	return o
 }
 
