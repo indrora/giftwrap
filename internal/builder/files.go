@@ -12,11 +12,29 @@ import (
 	"github.com/indrora/giftwrap/internal/types"
 )
 
+// globBase returns the directory prefix of pattern before the first wildcard.
+// "assets/**" → "assets", "foo/bar/*.md" → "foo/bar", "*.md" → "", "README.md" → ""
+func globBase(pattern string) string {
+	for i, ch := range pattern {
+		if ch == '*' || ch == '?' || ch == '[' {
+			if idx := strings.LastIndex(pattern[:i], "/"); idx >= 0 {
+				return pattern[:idx]
+			}
+			return ""
+		}
+	}
+	// No wildcard: use parent directory (empty if no slash)
+	if idx := strings.LastIndex(pattern, "/"); idx >= 0 {
+		return pattern[:idx]
+	}
+	return ""
+}
+
 // copyFiles copies files matched by each FileSpec into destDir.
 // Patterns use doublestar glob syntax, resolved against fsys.
-// For each match, the destination path is:
-//   - filepath.Join(destDir, spec.Dest, matchPath) if spec.Dest is set
-//   - filepath.Join(destDir, matchPath) otherwise (preserves relative structure)
+// For each match, the destination path is computed rsync-style when spec.Dest is set:
+// the non-wildcard prefix of spec.Src is stripped from the matched path before prepending dest.
+// When spec.Dest is empty, the full relative path is preserved unchanged.
 //
 // Returns an error if any spec matches no files.
 func copyFiles(specs []types.FileSpec, destDir string, fsys fs.FS) error {
@@ -38,7 +56,13 @@ func copyFiles(specs []types.FileSpec, destDir string, fsys fs.FS) error {
 				continue
 			}
 
-			destPath := filepath.Join(destDir, spec.Dest, matchPath)
+			relPath := matchPath
+			if spec.Dest != "" {
+				if base := globBase(spec.Src); base != "" {
+					relPath = strings.TrimPrefix(matchPath, base+"/")
+				}
+			}
+			destPath := filepath.Join(destDir, spec.Dest, relPath)
 			if err := os.MkdirAll(filepath.Dir(destPath), os.ModePerm); err != nil {
 				return fmt.Errorf("mkdir for %q: %w", destPath, err)
 			}

@@ -83,21 +83,24 @@ func (b *Builder) BuildTarget(target string) error {
 	// Run pre-exec calls for func
 
 	for _, variantName := range config.Targets {
-		fmt.Printf("Building target %s:%s\n", target, variantName)
-
-		config.Exec.PreExec.Run(b.runner, b.runOpts)
-
-		// TODO: Implement actual build logic...
 
 		buildpath := path.Join(b.proj.BuildDir, internal.Slugify(variantName))
-		os.MkdirAll(buildpath, os.ModePerm)
 
 		varsplit := strings.SplitN(variantName, "/", 2)
 
 		opts := b.runOpts.WithSysEnv().WithEnv(map[string]string{
-			"GOOS":   varsplit[0],
-			"GOARCH": varsplit[1],
+			"GOOS":         varsplit[0],
+			"GOARCH":       varsplit[1],
+			"BUILD_PATH":   buildpath,
+			"BUILD_TARGET": target,
 		})
+
+		fmt.Printf("Building target %s:%s\n", target, variantName)
+
+		config.Exec.PreExec.Run(b.runner, opts)
+
+		os.MkdirAll(buildpath, os.ModePerm)
+
 		b.runner.RunArgs("go", []string{"build", "-o", buildpath, config.Package}, opts)
 
 		fmt.Printf("Building to path %s\n", buildpath)
@@ -110,7 +113,7 @@ func (b *Builder) BuildTarget(target string) error {
 			}
 		}
 
-		config.Exec.PostExec.Run(b.runner, b.runOpts)
+		config.Exec.PostExec.Run(b.runner, opts)
 
 	}
 

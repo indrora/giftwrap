@@ -89,7 +89,23 @@ func TestCopyFiles_WithDest(t *testing.T) {
 		t.Fatalf("copyFiles: %v", err)
 	}
 
-	want := filepath.Join(dst, "resources", "assets", "logo.png")
+	want := filepath.Join(dst, "resources", "logo.png")
+	if _, err := os.Stat(want); err != nil {
+		t.Errorf("expected %q to exist: %v", want, err)
+	}
+}
+
+func TestCopyFiles_WithDest_TopLevelGlob(t *testing.T) {
+	src := t.TempDir()
+	dst := t.TempDir()
+	writeTempFile(t, src, "README.md", "hello")
+
+	specs := []types.FileSpec{{Src: "*.md", Dest: "docs/"}}
+	if err := copyFiles(specs, dst, os.DirFS(src)); err != nil {
+		t.Fatalf("copyFiles: %v", err)
+	}
+
+	want := filepath.Join(dst, "docs", "README.md")
 	if _, err := os.Stat(want); err != nil {
 		t.Errorf("expected %q to exist: %v", want, err)
 	}

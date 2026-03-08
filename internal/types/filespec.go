@@ -23,7 +23,9 @@ import (
 //
 // Glob patterns follow doublestar syntax (**, *, ?, [range]).
 // If dest is omitted or empty, the source's relative path is preserved.
-// dest is treated as a directory prefix: assets/logo.png with dest "res/" → res/assets/logo.png
+// When dest is set, the non-wildcard prefix of src is stripped from each matched path before
+// prepending dest (rsync-style): assets/logo.png matched by "assets/**" with dest "res/" → res/logo.png.
+// If src has no wildcard prefix (e.g. "*.md"), dest is simply prepended.
 type FileSpec struct {
 	Src  string `yaml:"src"`
 	Dest string `yaml:"dest,omitempty"`

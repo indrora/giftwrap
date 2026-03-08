@@ -4,7 +4,7 @@ env:
   whatnot: This is a long string
 include:
   - LICENSE
-  - src: internal/**/
+  - src: internal/**
     dest: src/
 exec:
   pre:
@@ -23,6 +23,10 @@ targets:
     - windows/amd64
     exec:
       pre:
-        - echo "pre-exec for target"
+        - echo "pre-exec for target, building $GOOS + $GOARCH"
       post:
         - echo "post-exec for target"
+        - >
+          echo "More things  here"
+          touch grass
+          say butts
