@@ -5,7 +5,7 @@ package cmd
 
 import (
 	_ "embed"
-	"fmt"
+	"errors"
 	"log"
 	"os"
 
@@ -20,19 +20,21 @@ import (
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize a project",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Long: `Initialize a giftwrap project. This will attempt to find
+a go.mod in the current file. If this does not exist, it will stop.`,
 	Run: doInit,
 }
 
-//go:embed "default.yml"
-var defaultBody []byte
-
 func doInit(cmd *cobra.Command, args []string) {
+
+	// Try to find the go.mod file
+
+	_, err := os.Stat(*modpath)
+	if errors.Is(err, os.ErrNotExist) {
+		log.Fatalf("Error finding go.mod: %v", err)
+	}
+
+	// if we're here, there's a go.mod in the current directory.
 
 	data, err := os.ReadFile("go.mod")
 	if err != nil {
@@ -46,7 +48,8 @@ func doInit(cmd *cobra.Command, args []string) {
 	}
 
 	// From this, generate a very basic configuration
-	//
+
+	rootLogger.Debug("start building config", "modfile", f)
 
 	pp := project.Project{
 		Name: "MyProject",
@@ -58,19 +61,21 @@ func doInit(cmd *cobra.Command, args []string) {
 		},
 	}
 
+	rootLogger.Debug("Generated config", "config", pp)
+
 	// Write out the file
 	o, err := os.Create(*wrapfile)
 	if err != nil {
-		panic(err)
+		rootLogger.Fatalf("Error creating config: %v", err)
 	}
 	defer o.Close()
 
 	dumper, err := yaml.NewDumper(o, yaml.V4)
 	if err != nil {
-		panic(err)
+		rootLogger.Fatalf("Error creating config: %v", err)
 	}
-	if dumper.Dump(pp) != nil {
-		fmt.Println("Couldn't write wrapfile...")
+	if err = dumper.Dump(pp); err != nil {
+		rootLogger.Fatalf("Error writing config: %v", err)
 	}
 	dumper.Close()
 

@@ -16,7 +16,7 @@ type BuildConfig struct {
 	// Package to build (REQUIRED)
 	Package string `yaml:"package"`
 	// Targets to build for (REQUIRED)
-	Targets types.CommandList `yaml:"targets"`
+	Targets []string `yaml:"targets"`
 	// Additional files to copy into each variant's output directory after build.
 	// Supports doublestar glob patterns. See types.FileSpec for YAML forms.
 	AdditionalFiles []types.FileSpec `yaml:"include,omitempty"`

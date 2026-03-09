@@ -8,8 +8,11 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
+
+var rootLogger *log.Logger
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -29,14 +32,30 @@ var rootCmd = &cobra.Command{
 
 	},
 
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		b, err := getWrapfile()
 		if err != nil {
-			panic(err)
+			return err
 		}
-
 		*wrapfile = b
 
+		level, err := log.ParseLevel(*loglevel)
+
+		if err != nil {
+			level = log.InfoLevel
+		}
+
+		show_caller := level == log.DebugLevel
+
+		rootLogger = log.NewWithOptions(os.Stderr, log.Options{
+			Level:           level,
+			ReportTimestamp: true,
+			ReportCaller:    show_caller,
+		})
+
+		rootLogger.Print("G I F T W R A P !")
+
+		return nil
 	},
 }
 
@@ -50,9 +69,11 @@ func Execute() {
 }
 
 var wrapfile *string
+var loglevel *string
 
 func init() {
 	wrapfile = rootCmd.PersistentFlags().String("wrapfile", "", "Path to the .wrapfile in use")
+	loglevel = rootCmd.PersistentFlags().String("log-level", "info", "Log level to use (debug, info, warn, error)")
 }
 
 var wrapfileSearchPaths = []string{

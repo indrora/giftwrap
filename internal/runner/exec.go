@@ -5,13 +5,21 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+
+	"github.com/charmbracelet/log"
 )
 
 type ExecRunner struct {
 	// :)
+	logger *log.Logger
+}
+
+func NewExecRunner(l *log.Logger) *ExecRunner {
+	return &ExecRunner{logger: l}
 }
 
 func (r ExecRunner) Run(cmd string, options Options) error {
+	r.logger.Debug("Running command", "cmd", cmd, "options", options)
 	shell := options.Shell
 	if shell == "" {
 		if runtime.GOOS == "windows" {
@@ -25,6 +33,7 @@ func (r ExecRunner) Run(cmd string, options Options) error {
 }
 
 func (r ExecRunner) RunArgs(c string, args []string, options Options) error {
+	r.logger.Debug("Running command with args", "cmd", c, "args", args, "options", options)
 	process := exec.Command(c, args...)
 
 	// Format the command environment

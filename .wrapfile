@@ -9,6 +9,7 @@ exec:
     - echo "pre-exec global"
   post:
     - echo "post-exec global"
+    - echo "$foo is foo"
 targets:
   default:
     env:
@@ -24,7 +25,7 @@ targets:
     exec:
       pre:
         - echo "pre-exec for target, building $GOOS + $GOARCH"
-        - echo "$WHATNOT"
+        - echo "$whatnot"
       post:
         - echo "post-exec for target"
-        - echo "foo is $FOO and whatnot is $WHATNOT"
+        - echo "foo is $foo and whatnot is $whatnot"

@@ -28,33 +28,41 @@ func doBuild(cmd *cobra.Command, args []string) {
 		args = []string{globProject.DefaultTarget}
 	}
 
-	run := new(runner.ExecRunner)
+	run := runner.NewExecRunner(rootLogger)
 
 	builder, err := builder.NewBuilder(*globProject, *run)
+
+	if err != nil {
+		rootLogger.Fatal("failed setting up builder", "err", err)
+	}
 
 	// Configure the shell override.
 
 	if shell != nil && *shell != "" {
 		builder.Shell = *shell
+		rootLogger.Debug("Shell specified on cmdline", "shell", *shell)
 	}
 
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println("Start build")
+	rootLogger.Debug("Start build", "args", args, "dir", globProject.BuildDir)
 	if err := builder.Setup(); err != nil {
-		panic(err)
+		rootLogger.Fatal("failed during startup", "err", err)
 	}
 
 	for _, v := range args {
-		fmt.Printf("Building target %s\n", v)
-		builder.BuildTarget(v)
+		rootLogger.Info("Building target", "target", v)
+
+		for _, a := range globProject.Targets[v].Targets {
+			rootLogger.Info("building machine", "machine", a)
+			err = builder.BuildTarget(v, a)
+			if err != nil {
+				rootLogger.Fatal("failed to build target", "target", v, "machine", a, "err", err)
+			}
+		}
+
 	}
 
-	fmt.Println("Tearing down build")
 	if err := builder.Teardown(); err != nil {
-		panic(err)
+		rootLogger.Fatal("failed post-exec")
 	}
 
 	fmt.Println("Finished!")

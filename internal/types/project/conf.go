@@ -7,9 +7,11 @@ import (
 	"github.com/indrora/giftwrap/internal/types"
 )
 
-// Config holds the configuration for the giftwrap tool.
-
+// a Project is the core structure of the Wrapfile
 type Project struct {
+	// (non-yaml) Directory that holds the wrapfile
+	Path string `yaml:"-"`
+
 	// name of the project (slugified for release files)
 	Name string `yaml:"name"`
 	// Additional files to copy into each variant's output directory after build.

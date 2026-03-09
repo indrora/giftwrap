@@ -1,12 +1,12 @@
 package builder
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"os"
 	"path"
 	"runtime"
+	"slices"
 	"strings"
 
 	"github.com/indrora/giftwrap/internal"
@@ -68,59 +68,69 @@ func (b *Builder) Setup() error {
 		return fmt.Errorf("failed to create path %s: %v", b.proj.DistDir, err)
 	}
 
-	if err := b.proj.Exec.PreExec.Run(b.runner, b.runOpts); err != nil {
+	opts := b.runOpts.WithSysEnv().
+		WithShell(b.Shell).
+		WithEnv(b.proj.Environment)
+
+	if err := b.proj.Exec.PreExec.Run(b.runner, opts); err != nil {
 		return fmt.Errorf("failed to run pre-build functions: %v", err)
 	}
 
 	return nil
 }
 
-func (b *Builder) BuildTarget(target string) error {
+func (b *Builder) BuildTarget(target, variantName string) error {
 
 	config, ok := b.realTargets[target]
 
 	if !ok {
-		return errors.New("no such target")
+		return fmt.Errorf("no such target %s", target)
 	}
 
-	// Run pre-exec calls for func
+	ok = slices.Contains(config.Targets, variantName)
+	if !ok {
+		return fmt.Errorf("No such variant %s", variantName)
+	}
 
-	for _, variantName := range config.Targets {
+	buildpath := path.Join(b.proj.BuildDir, internal.Slugify(variantName))
 
-		buildpath := path.Join(b.proj.BuildDir, internal.Slugify(variantName))
+	varsplit := strings.SplitN(variantName, "/", 2)
 
-		varsplit := strings.SplitN(variantName, "/", 2)
+	opts := b.runOpts.WithSysEnv().
+		WithShell(b.Shell).
+		WithEnv(config.Environment).
+		WithEnv(map[string]string{
+			"GOOS":         varsplit[0],
+			"GOARCH":       varsplit[1],
+			"BUILD_PATH":   buildpath,
+			"BUILD_TARGET": target,
+		})
 
-		opts := b.runOpts.WithSysEnv().
-			WithShell(b.Shell).
-			WithEnv(config.Environment).
-			WithEnv(map[string]string{
-				"GOOS":         varsplit[0],
-				"GOARCH":       varsplit[1],
-				"BUILD_PATH":   buildpath,
-				"BUILD_TARGET": target,
-			})
+	err := config.Exec.PreExec.Run(b.runner, opts)
+	if err != nil {
+		return fmt.Errorf("Failed pre-exec stage for %s (%s): %v", target, variantName, err)
+	}
 
-		fmt.Printf("Building target %s:%s\n", target, variantName)
+	err = os.MkdirAll(buildpath, os.ModePerm)
 
-		config.Exec.PreExec.Run(b.runner, opts)
+	if err != nil {
+		return fmt.Errorf("failed creating output directory for %s (%s): %v", target, variantName, err)
+	}
 
-		os.MkdirAll(buildpath, os.ModePerm)
+	err = b.runner.RunArgs("go", []string{"build", "-o", buildpath, config.Package}, opts)
+	if err != nil {
+		return fmt.Errorf("build failed for %s (%s): %v", target, variantName, err)
+	}
 
-		b.runner.RunArgs("go", []string{"build", "-o", buildpath, config.Package}, opts)
-
-		fmt.Printf("Building to path %s\n", buildpath)
-
-		fmt.Println(config.AdditionalFiles)
-
-		if len(config.AdditionalFiles) > 0 {
-			if err := copyFiles(config.AdditionalFiles, buildpath, os.DirFS(".")); err != nil {
-				return fmt.Errorf("copying files for %s: %w", variantName, err)
-			}
+	if len(config.AdditionalFiles) > 0 {
+		if err := copyFiles(config.AdditionalFiles, buildpath, os.DirFS(".")); err != nil {
+			return fmt.Errorf("copying files for %s: %w", variantName, err)
 		}
+	}
 
-		config.Exec.PostExec.Run(b.runner, opts)
-
+	err = config.Exec.PostExec.Run(b.runner, opts)
+	if err != nil {
+		return fmt.Errorf("Failed post-exec stage for %s (%s): %v", target, variantName, err)
 	}
 
 	return nil
@@ -129,8 +139,12 @@ func (b *Builder) BuildTarget(target string) error {
 func (b *Builder) Teardown() error {
 	// Call post-build functions
 
-	if err := b.proj.Exec.PostExec.Run(b.runner, b.runOpts); err != nil {
-		return err
+	opts := b.runOpts.WithSysEnv().
+		WithShell(b.Shell).
+		WithEnv(b.proj.Environment)
+
+	if err := b.proj.Exec.PostExec.Run(b.runner, opts); err != nil {
+		return fmt.Errorf("Failed pre-exec stage: %v ", err)
 	}
 	return nil
 }

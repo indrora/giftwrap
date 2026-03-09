@@ -3,6 +3,7 @@ package project
 import (
 	"io"
 	"os"
+	"path/filepath"
 
 	"go.yaml.in/yaml/v4"
 )
@@ -14,8 +15,15 @@ func LoadProject(path string) (*Project, error) {
 	}
 	defer f.Close()
 
-	project := &Project{
+	// Get the real path of the file
+	fullpath, err := filepath.Abs(path)
+	rootDir := filepath.Dir(fullpath)
+	if err != nil {
+		return nil, err
+	}
 
+	project := &Project{
+		Path:          rootDir,
 		BuildDir:      "build",
 		DistDir:       "dist",
 		DefaultTarget: "default",
