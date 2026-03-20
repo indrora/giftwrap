@@ -1,7 +1,9 @@
 package runner
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"os/exec"
 	"runtime"
 	"strings"
@@ -45,14 +47,18 @@ func (r ExecRunner) RunArgs(c string, args []string, options Options) error {
 	}
 
 	process.Env = env
-	process.Stdout = options.Stdout
-	process.Stderr = options.Stderr
+
+	var outBuf, errBuf bytes.Buffer
+	process.Stdout = &outBuf
+	process.Stderr = &errBuf
 
 	if err := process.Start(); err != nil {
 		return ProcessFailedError{Cmd: c, Code: -1, Reason: err.Error()}
 	}
 
 	if err := process.Wait(); err != nil {
+		io.Copy(options.Stdout, &outBuf)
+		io.Copy(options.Stderr, &errBuf)
 		return ProcessFailedError{Cmd: process.String(), Code: process.ProcessState.ExitCode(), Reason: err.Error()}
 	}
 

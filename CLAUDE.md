@@ -39,7 +39,7 @@ go run . build          # Run the CLI build command
 
 **BuildConfig** fields of note: `Package` (Go package path), `Targets` (`[]string` of `GOOS/GOARCH`), `Exec.PreExec`/`PostExec` (`CommandList`), `Environment` (merged with project env, target overrides project).
 
-Defaults loaded in `LoadProject`: `BuildDir="build"`, `DistDir="dist"`, `DefaultTarget="default"`.
+Defaults loaded in `LoadProject`: `BuildDir="_build"`, `DistDir="_dist"`, `DefaultTarget="default"`.
 
 # Standards
 

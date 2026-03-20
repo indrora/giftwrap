@@ -5,12 +5,8 @@ package cmd
 
 import (
 	"fmt"
-	"path/filepath"
-	"strings"
 
-	"github.com/indrora/giftwrap/internal"
-	"github.com/indrora/giftwrap/internal/archiver"
-	"github.com/indrora/giftwrap/internal/builder"
+	"github.com/indrora/giftwrap/internal/packager"
 	"github.com/indrora/giftwrap/internal/runner"
 	"github.com/spf13/cobra"
 )
@@ -28,21 +24,19 @@ func doRelease(cmd *cobra.Command, args []string) {
 		args = globProject.DefaultTargets
 	}
 
-	singleDefault := globProject.IsSingleDefault()
-
 	run := runner.NewExecRunner(rootLogger)
 
-	b, err := builder.NewBuilder(*globProject, *run)
+	pkg, err := packager.NewPackager(*globProject, *run)
 	if err != nil {
-		rootLogger.Fatal("failed setting up builder", "err", err)
+		rootLogger.Fatal("failed setting up packager", "err", err)
 	}
 
 	if releaseShell != nil && *releaseShell != "" {
-		b.Shell = *releaseShell
+		pkg.Shell = *releaseShell
 		rootLogger.Debug("shell specified on cmdline", "shell", *releaseShell)
 	}
 
-	if err := b.Setup(); err != nil {
+	if err := pkg.Setup(); err != nil {
 		rootLogger.Fatal("failed during startup", "err", err)
 	}
 
@@ -50,36 +44,15 @@ func doRelease(cmd *cobra.Command, args []string) {
 		rootLogger.Info("releasing target", "target", targetName)
 
 		for _, variant := range globProject.Targets[targetName].Targets {
-			rootLogger.Info("building variant", "variant", variant)
+			rootLogger.Info("packaging variant", "variant", variant)
 
-			goos := strings.SplitN(variant, "/", 2)[0]
-
-			formatStr := globProject.EffectiveArchiveFormat(targetName, goos)
-			format, err := archiver.ParseFormat(formatStr)
-			if err != nil {
-				rootLogger.Fatal("invalid archive format", "target", targetName, "variant", variant, "format", formatStr, "err", err)
-			}
-
-			if err := b.BuildTarget(targetName, variant); err != nil {
-				rootLogger.Fatal("failed to build target", "target", targetName, "variant", variant, "err", err)
-			}
-
-			archiveName, err := archiver.ArchiveName(globProject.Name, targetName, variant, format, singleDefault)
-			if err != nil {
-				rootLogger.Fatal("could not construct archive name", "target", targetName, "variant", variant, "err", err)
-			}
-
-			srcDir := filepath.Join(globProject.BuildDir, internal.Slugify(targetName), internal.Slugify(variant))
-			destPath := filepath.Join(globProject.DistDir, archiveName)
-
-			rootLogger.Info("packaging", "archive", archiveName)
-			if err := archiver.ArchiveDir(format, srcDir, destPath); err != nil {
-				rootLogger.Fatal("failed to create archive", "archive", destPath, "err", err)
+			if err := pkg.PackageTarget(targetName, variant); err != nil {
+				rootLogger.Fatal("failed to package target", "target", targetName, "variant", variant, "err", err)
 			}
 		}
 	}
 
-	if err := b.Teardown(); err != nil {
+	if err := pkg.Teardown(); err != nil {
 		rootLogger.Fatal("failed post-exec", "err", err)
 	}
 
