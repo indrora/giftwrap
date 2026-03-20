@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/indrora/giftwrap/internal"
 	"github.com/indrora/giftwrap/internal/archiver"
@@ -48,14 +49,16 @@ func doRelease(cmd *cobra.Command, args []string) {
 	for _, targetName := range args {
 		rootLogger.Info("releasing target", "target", targetName)
 
-		formatStr := globProject.EffectiveArchiveFormat(targetName)
-		format, err := archiver.ParseFormat(formatStr)
-		if err != nil {
-			rootLogger.Fatal("invalid archive format", "target", targetName, "format", formatStr, "err", err)
-		}
-
 		for _, variant := range globProject.Targets[targetName].Targets {
 			rootLogger.Info("building variant", "variant", variant)
+
+			goos := strings.SplitN(variant, "/", 2)[0]
+
+			formatStr := globProject.EffectiveArchiveFormat(targetName, goos)
+			format, err := archiver.ParseFormat(formatStr)
+			if err != nil {
+				rootLogger.Fatal("invalid archive format", "target", targetName, "variant", variant, "format", formatStr, "err", err)
+			}
 
 			if err := b.BuildTarget(targetName, variant); err != nil {
 				rootLogger.Fatal("failed to build target", "target", targetName, "variant", variant, "err", err)

@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(go test *)"
+      "Bash(go test *)",
+      "mcp__gopls__go_workspace",
+      "Bash(go build:*)"
     ]
   }
 }

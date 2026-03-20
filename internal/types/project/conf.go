@@ -28,9 +28,10 @@ type Project struct {
 	BuildDir       string            `yaml:"buildPath,omitempty"`      // defaults to "_build"
 	DistDir        string            `yaml:"distPath,omitempty"`       // defaults to "_dist"
 	DefaultTargets types.MultiString `yaml:"defaultTargets,omitempty"` // defaults to "default"
-	// Archive format for release output. Defaults to "tar.gz".
-	// Valid values: "tar.gz", "tar.zst", "zip".
-	ArchiveFormat string `yaml:"archiveFormat,omitempty"`
+	// Archive format for release output.
+	// Accepts a string ("tar.gz") or a GOOS map ({default: tar.gz, windows: zip}).
+	// Built-in defaults: "zip" for windows, "tar.gz" for everything else.
+	ArchiveFormat ArchiveFormatConfig `yaml:"archiveFormat,omitempty"`
 	// Build configurations. Must have at least one.
 	Targets map[string]BuildConfig `yaml:"targets"`
 }
@@ -51,14 +52,22 @@ func (p *Project) IsSingleDefault() bool {
 	return exists
 }
 
-// EffectiveArchiveFormat returns the archive format to use for a given target.
-// The target-level setting overrides the project-level setting; if neither is set, "tar.gz" is returned.
-func (p *Project) EffectiveArchiveFormat(targetName string) string {
-	if tgt, ok := p.Targets[targetName]; ok && tgt.ArchiveFormat != "" {
-		return tgt.ArchiveFormat
+// EffectiveArchiveFormat returns the archive format for a given target and GOOS.
+// Resolution order: target-level (per-GOOS) → project-level (per-GOOS) → built-in default.
+// Built-in defaults: "zip" for windows, "tar.gz" for everything else.
+func (p *Project) EffectiveArchiveFormat(targetName, goos string) string {
+	if tgt, ok := p.Targets[targetName]; ok && tgt.ArchiveFormat.IsSet() {
+		if f := tgt.ArchiveFormat.ForOS(goos); f != "" {
+			return f
+		}
 	}
-	if p.ArchiveFormat != "" {
-		return p.ArchiveFormat
+	if p.ArchiveFormat.IsSet() {
+		if f := p.ArchiveFormat.ForOS(goos); f != "" {
+			return f
+		}
+	}
+	if goos == "windows" {
+		return "zip"
 	}
 	return "tar.gz"
 }
