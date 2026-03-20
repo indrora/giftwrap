@@ -1,6 +1,7 @@
 package project
 
 import (
+	"runtime"
 	"testing"
 )
 
@@ -14,26 +15,8 @@ func TestShellConfigForOS(t *testing.T) {
 		{
 			name:   "empty config windows default",
 			config: ShellConfig{},
-			goos:   "windows",
-			want:   "cmd /c",
-		},
-		{
-			name:   "empty config unix default",
-			config: ShellConfig{},
-			goos:   "linux",
-			want:   "sh -c",
-		},
-		{
-			name:   "empty config darwin default",
-			config: ShellConfig{},
-			goos:   "darwin",
-			want:   "sh -c",
-		},
-		{
-			name:   "empty config plan9 default",
-			config: ShellConfig{},
-			goos:   "plan9",
-			want:   "sh -c",
+			goos:   runtime.GOOS,
+			want:   _DEFAULT_SHELL,
 		},
 		{
 			name:   "exact windows match",
@@ -60,12 +43,6 @@ func TestShellConfigForOS(t *testing.T) {
 			want:   "bash -c",
 		},
 		{
-			name:   "unix key does not apply on windows",
-			config: ShellConfig{"unix": "bash -c"},
-			goos:   "windows",
-			want:   "cmd /c",
-		},
-		{
 			name:   "darwin overrides unix",
 			config: ShellConfig{"unix": "bash -c", "darwin": "zsh -c"},
 			goos:   "darwin",
@@ -88,12 +65,6 @@ func TestShellConfigForOS(t *testing.T) {
 			config: ShellConfig{"unix": "bash -c"},
 			goos:   "netbsd",
 			want:   "bash -c",
-		},
-		{
-			name:   "arbitrary OS falls back to built-in default",
-			config: ShellConfig{},
-			goos:   "netbsd",
-			want:   "sh -c",
 		},
 	}
 

@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 	"path"
-	"runtime"
 	"slices"
 	"strings"
 
@@ -31,7 +30,7 @@ func NewBuilder(p project.Project, r runner.Runner) (*Builder, error) {
 	b := &Builder{}
 	b.proj = p
 	b.runner = r
-	b.Shell = p.Shell.ForOS(runtime.GOOS)
+	b.Shell = p.Shell.ForHost()
 	b.runOpts = runner.NewOptions()
 
 	// reify all configurations
