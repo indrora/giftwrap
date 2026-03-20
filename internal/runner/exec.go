@@ -1,9 +1,7 @@
 package runner
 
 import (
-	"bytes"
 	"fmt"
-	"io"
 	"os/exec"
 	"runtime"
 	"strings"
@@ -35,7 +33,7 @@ func (r ExecRunner) Run(cmd string, options Options) error {
 }
 
 func (r ExecRunner) RunArgs(c string, args []string, options Options) error {
-	r.logger.Debug("Running command with args", "cmd", c, "args", args, "options", options)
+	r.logger.Debug("Running command with args", "cmd", c, "args", args)
 	process := exec.Command(c, args...)
 
 	// Format the command environment
@@ -48,17 +46,14 @@ func (r ExecRunner) RunArgs(c string, args []string, options Options) error {
 
 	process.Env = env
 
-	var outBuf, errBuf bytes.Buffer
-	process.Stdout = &outBuf
-	process.Stderr = &errBuf
+	process.Stdout = options.Stdout
+	process.Stderr = options.Stderr
 
 	if err := process.Start(); err != nil {
 		return ProcessFailedError{Cmd: c, Code: -1, Reason: err.Error()}
 	}
 
 	if err := process.Wait(); err != nil {
-		io.Copy(options.Stdout, &outBuf)
-		io.Copy(options.Stderr, &errBuf)
 		return ProcessFailedError{Cmd: process.String(), Code: process.ProcessState.ExitCode(), Reason: err.Error()}
 	}
 

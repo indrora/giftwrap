@@ -9,7 +9,7 @@ import (
 
 type Options struct {
 	Env    map[string]string
-	Shell  string    // shell invocation, e.g. "sh -c" or "cmd /c"; empty = runtime default
+	Shell  string // shell invocation, e.g. "sh -c" or "cmd /c"; empty = runtime default
 	Stdout io.Writer
 	Stderr io.Writer
 }

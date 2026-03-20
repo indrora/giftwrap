@@ -26,12 +26,12 @@ type Builder struct {
 	realTargets map[string]project.BuildConfig
 }
 
-func NewBuilder(p project.Project, r runner.Runner) (*Builder, error) {
+func NewBuilder(p project.Project, r runner.Runner, o runner.Options) (*Builder, error) {
 	b := &Builder{}
 	b.proj = p
 	b.runner = r
 	b.Shell = p.Shell.ForHost()
-	b.runOpts = runner.NewOptions()
+	b.runOpts = o
 
 	// reify all configurations
 

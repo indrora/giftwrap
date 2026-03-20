@@ -6,6 +6,8 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/charmbracelet/log"
+	"github.com/indrora/giftwrap/internal"
 	"github.com/indrora/giftwrap/internal/builder"
 	"github.com/indrora/giftwrap/internal/packager"
 	"github.com/indrora/giftwrap/internal/runner"
@@ -27,7 +29,11 @@ func doRelease(cmd *cobra.Command, args []string) {
 
 	run := runner.NewExecRunner(rootLogger)
 
-	b, err := builder.NewBuilder(*globProject, *run)
+	opts := runner.NewOptions().
+		WithStdout(internal.NewLogWriter(rootLogger, log.DebugLevel)).
+		WithStderr(internal.NewLogWriter(rootLogger, log.ErrorLevel))
+
+	b, err := builder.NewBuilder(*globProject, *run, opts)
 	if err != nil {
 		rootLogger.Fatal("failed setting up builder", "err", err)
 	}
