@@ -20,4 +20,6 @@ type BuildConfig struct {
 	// Additional files to copy into each variant's output directory after build.
 	// Supports doublestar glob patterns. See types.FileSpec for YAML forms.
 	AdditionalFiles []types.FileSpec `yaml:"include,omitempty"`
+	// Archive format override for this target. Overrides the project-level archiveFormat.
+	ArchiveFormat string `yaml:"archiveFormat,omitempty"`
 }

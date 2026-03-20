@@ -28,6 +28,9 @@ type Project struct {
 	BuildDir       string            `yaml:"buildPath,omitempty"`      // defaults to "_build"
 	DistDir        string            `yaml:"distPath,omitempty"`       // defaults to "_dist"
 	DefaultTargets types.MultiString `yaml:"defaultTargets,omitempty"` // defaults to "default"
+	// Archive format for release output. Defaults to "tar.gz".
+	// Valid values: "tar.gz", "tar.zst", "zip".
+	ArchiveFormat string `yaml:"archiveFormat,omitempty"`
 	// Build configurations. Must have at least one.
 	Targets map[string]BuildConfig `yaml:"targets"`
 }
@@ -37,6 +40,28 @@ var (
 	NoPackageErr      = errors.New("package was not specified")
 	NoTargetsErr      = errors.New("no targets were specified")
 )
+
+// IsSingleDefault reports whether the project has exactly one target and it is the only default.
+// Used by the release command to decide whether to include the target name in archive filenames.
+func (p *Project) IsSingleDefault() bool {
+	if len(p.Targets) != 1 || len(p.DefaultTargets) != 1 {
+		return false
+	}
+	_, exists := p.Targets[p.DefaultTargets[0]]
+	return exists
+}
+
+// EffectiveArchiveFormat returns the archive format to use for a given target.
+// The target-level setting overrides the project-level setting; if neither is set, "tar.gz" is returned.
+func (p *Project) EffectiveArchiveFormat(targetName string) string {
+	if tgt, ok := p.Targets[targetName]; ok && tgt.ArchiveFormat != "" {
+		return tgt.ArchiveFormat
+	}
+	if p.ArchiveFormat != "" {
+		return p.ArchiveFormat
+	}
+	return "tar.gz"
+}
 
 func (p *Project) ReifyConfig(target string) (*BuildConfig, error) {
 
