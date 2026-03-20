@@ -1,6 +1,7 @@
 package project
 
 import (
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -23,10 +24,10 @@ func LoadProject(path string) (*Project, error) {
 	}
 
 	project := &Project{
-		Path:          rootDir,
-		BuildDir:      "build",
-		DistDir:       "dist",
-		DefaultTarget: "default",
+		Path:           rootDir,
+		BuildDir:       "_build",
+		DistDir:        "_dist",
+		DefaultTargets: []string{"default"},
 	}
 	body, err := io.ReadAll(f)
 	if err != nil {
@@ -35,6 +36,16 @@ func LoadProject(path string) (*Project, error) {
 	err = yaml.Load(body, project)
 	if err != nil {
 		return nil, err
+	}
+
+	if len(project.Targets) < 1 {
+		return nil, fmt.Errorf("No targets defined")
+	}
+
+	for _, v := range project.DefaultTargets {
+		if _, exists := project.Targets[v]; !exists {
+			return nil, fmt.Errorf("Default %s target does not exist", v)
+		}
 	}
 
 	return project, nil

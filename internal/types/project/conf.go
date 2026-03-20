@@ -25,9 +25,9 @@ type Project struct {
 	// See ShellConfig for resolution order and YAML format.
 	Shell ShellConfig `yaml:"shell,omitempty"`
 	// Directory to place build artifacts
-	BuildDir      string `yaml:"buildPath,omitempty"`     // defaults to "build"
-	DistDir       string `yaml:"distPath,omitempty"`      // defaults to "dist"
-	DefaultTarget string `yaml:"defaultTarget,omitempty"` // defaults to "default"
+	BuildDir       string            `yaml:"buildPath,omitempty"`      // defaults to "_build"
+	DistDir        string            `yaml:"distPath,omitempty"`       // defaults to "_dist"
+	DefaultTargets types.MultiString `yaml:"defaultTargets,omitempty"` // defaults to "default"
 	// Build configurations. Must have at least one.
 	Targets map[string]BuildConfig `yaml:"targets"`
 }

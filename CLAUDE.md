@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-go build ./...          # Build the project
+go build .          # Build the project
 go test ./...           # Run all tests
 go test ./internal/runner/...   # Run tests in a specific package
 go run . build          # Run the CLI build command

@@ -92,7 +92,7 @@ func (b *Builder) BuildTarget(target, variantName string) error {
 		return fmt.Errorf("No such variant %s", variantName)
 	}
 
-	buildpath := path.Join(b.proj.BuildDir, internal.Slugify(variantName))
+	buildpath := path.Join(b.proj.BuildDir, internal.Slugify(target), internal.Slugify(variantName))
 
 	varsplit := strings.SplitN(variantName, "/", 2)
 

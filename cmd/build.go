@@ -25,7 +25,7 @@ func doBuild(cmd *cobra.Command, args []string) {
 	if len(args) == 0 {
 		// use the default target
 
-		args = []string{globProject.DefaultTarget}
+		args = globProject.DefaultTargets
 	}
 
 	run := runner.NewExecRunner(rootLogger)
