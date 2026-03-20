@@ -2,63 +2,47 @@ package packager
 
 import (
 	"fmt"
-	"io"
+	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/indrora/giftwrap/internal"
 	"github.com/indrora/giftwrap/internal/archiver"
-	"github.com/indrora/giftwrap/internal/builder"
-	"github.com/indrora/giftwrap/internal/runner"
 	"github.com/indrora/giftwrap/internal/types/project"
 )
 
-// Packager builds and archives release targets.
+// Packager archives built release targets into the distribution directory.
+// It does not build — callers are responsible for building first (e.g. via builder.Builder).
 type Packager struct {
-	b             *builder.Builder
 	proj          project.Project
-	Shell         string
 	singleDefault bool
 }
 
-// NewPackager constructs a Packager backed by the given project and runner.
-func NewPackager(p project.Project, r runner.Runner) (*Packager, error) {
-	b, err := builder.NewBuilder(p, r)
-	if err != nil {
-		return nil, err
-	}
+// NewPackager constructs a Packager for the given project.
+func NewPackager(p project.Project) *Packager {
 	return &Packager{
-		b:             b,
 		proj:          p,
-		Shell:         b.Shell,
 		singleDefault: p.IsSingleDefault(),
-	}, nil
+	}
 }
 
-// SetIO forwards output writers to the underlying builder.
-func (p *Packager) SetIO(out, err io.Writer) {
-	p.b.SetIO(out, err)
-}
-
-// Setup creates output directories and runs project-level pre-exec hooks.
+// Setup creates the distribution directory.
 func (p *Packager) Setup() error {
-	p.b.Shell = p.Shell
-	return p.b.Setup()
+	if err := os.MkdirAll(p.proj.DistDir, os.ModePerm); err != nil {
+		return fmt.Errorf("failed to create dist dir %s: %w", p.proj.DistDir, err)
+	}
+	return nil
 }
 
-// PackageTarget builds the given variant of target and archives the output.
+// PackageTarget archives the build output for the given target variant.
+// The build output must already exist at the expected path under BuildDir.
 func (p *Packager) PackageTarget(target, variantName string) error {
-	p.b.Shell = p.Shell
 	goos := strings.SplitN(variantName, "/", 2)[0]
 
 	formatStr := p.proj.EffectiveArchiveFormat(target, goos)
 	format, err := archiver.ParseFormat(formatStr)
 	if err != nil {
 		return fmt.Errorf("invalid archive format for %s (%s): %w", target, variantName, err)
-	}
-
-	if err := p.b.BuildTarget(target, variantName); err != nil {
-		return fmt.Errorf("build failed for %s (%s): %w", target, variantName, err)
 	}
 
 	archiveName, err := archiver.ArchiveName(p.proj.Name, target, variantName, format, p.singleDefault)
@@ -74,10 +58,4 @@ func (p *Packager) PackageTarget(target, variantName string) error {
 	}
 
 	return nil
-}
-
-// Teardown runs project-level post-exec hooks.
-func (p *Packager) Teardown() error {
-	p.b.Shell = p.Shell
-	return p.b.Teardown()
 }

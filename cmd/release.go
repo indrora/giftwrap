@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/indrora/giftwrap/internal/builder"
 	"github.com/indrora/giftwrap/internal/packager"
 	"github.com/indrora/giftwrap/internal/runner"
 	"github.com/spf13/cobra"
@@ -26,24 +27,36 @@ func doRelease(cmd *cobra.Command, args []string) {
 
 	run := runner.NewExecRunner(rootLogger)
 
-	pkg, err := packager.NewPackager(*globProject, *run)
+	b, err := builder.NewBuilder(*globProject, *run)
 	if err != nil {
-		rootLogger.Fatal("failed setting up packager", "err", err)
+		rootLogger.Fatal("failed setting up builder", "err", err)
 	}
 
 	if releaseShell != nil && *releaseShell != "" {
-		pkg.Shell = *releaseShell
+		b.Shell = *releaseShell
 		rootLogger.Debug("shell specified on cmdline", "shell", *releaseShell)
 	}
 
-	if err := pkg.Setup(); err != nil {
+	pkg := packager.NewPackager(*globProject)
+
+	if err := b.Setup(); err != nil {
 		rootLogger.Fatal("failed during startup", "err", err)
+	}
+
+	if err := pkg.Setup(); err != nil {
+		rootLogger.Fatal("failed setting up packager", "err", err)
 	}
 
 	for _, targetName := range args {
 		rootLogger.Info("releasing target", "target", targetName)
 
 		for _, variant := range globProject.Targets[targetName].Targets {
+			rootLogger.Info("building variant", "variant", variant)
+
+			if err := b.BuildTarget(targetName, variant); err != nil {
+				rootLogger.Fatal("failed to build target", "target", targetName, "variant", variant, "err", err)
+			}
+
 			rootLogger.Info("packaging variant", "variant", variant)
 
 			if err := pkg.PackageTarget(targetName, variant); err != nil {
@@ -52,7 +65,7 @@ func doRelease(cmd *cobra.Command, args []string) {
 		}
 	}
 
-	if err := pkg.Teardown(); err != nil {
+	if err := b.Teardown(); err != nil {
 		rootLogger.Fatal("failed post-exec", "err", err)
 	}
 

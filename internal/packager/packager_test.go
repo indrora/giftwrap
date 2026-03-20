@@ -1,10 +1,10 @@
 package packager
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/indrora/giftwrap/internal/runner"
 	"github.com/indrora/giftwrap/internal/types/project"
 )
 
@@ -29,15 +29,16 @@ func makeTestProject(t *testing.T) project.Project {
 
 func TestPackageTargetSuccess(t *testing.T) {
 	proj := makeTestProject(t)
-	r := runner.PrintRunner{}
-
-	pkg, err := NewPackager(proj, r)
-	if err != nil {
-		t.Fatalf("NewPackager: %v", err)
-	}
+	pkg := NewPackager(proj)
 
 	if err := pkg.Setup(); err != nil {
 		t.Fatalf("Setup: %v", err)
+	}
+
+	// Simulate a prior build by creating the expected source directory.
+	srcDir := filepath.Join(proj.BuildDir, "default", "linux-amd64")
+	if err := os.MkdirAll(srcDir, 0o755); err != nil {
+		t.Fatalf("creating srcDir: %v", err)
 	}
 
 	if err := pkg.PackageTarget("default", "linux/amd64"); err != nil {
@@ -45,33 +46,10 @@ func TestPackageTargetSuccess(t *testing.T) {
 	}
 }
 
-func TestPackageTargetUnknownTarget(t *testing.T) {
-	proj := makeTestProject(t)
-	r := runner.PrintRunner{}
-
-	pkg, err := NewPackager(proj, r)
-	if err != nil {
-		t.Fatalf("NewPackager: %v", err)
-	}
-
-	if err := pkg.Setup(); err != nil {
-		t.Fatalf("Setup: %v", err)
-	}
-
-	if err := pkg.PackageTarget("nonexistent", "linux/amd64"); err == nil {
-		t.Error("expected error for unknown target, got nil")
-	}
-}
-
 func TestPackageTargetBadArchiveFormat(t *testing.T) {
 	proj := makeTestProject(t)
 	proj.ArchiveFormat = project.ArchiveFormatConfig{Default: "invalid"}
-	r := runner.PrintRunner{}
-
-	pkg, err := NewPackager(proj, r)
-	if err != nil {
-		t.Fatalf("NewPackager: %v", err)
-	}
+	pkg := NewPackager(proj)
 
 	if err := pkg.Setup(); err != nil {
 		t.Fatalf("Setup: %v", err)
