@@ -83,6 +83,19 @@ func (p *Project) ReifyConfig(target string) (*BuildConfig, error) {
 	// convenience, since we're overwriting some things.
 	*buildconfig = tgt
 
+	// Clean up a few things
+
+	if buildconfig.Package == "" {
+		return nil, NoPackageErr
+	}
+	if len(buildconfig.Targets) < 1 {
+		return nil, NoTargetsErr
+	}
+
+	if buildconfig.Exec == nil {
+		buildconfig.Exec = &BuildCmds{}
+	}
+
 	// The environment variables start as the project's enviornment variables, then the target,
 	// with target overriding project
 

@@ -28,6 +28,7 @@ func LoadProject(path string) (*Project, error) {
 		BuildDir:       "_build",
 		DistDir:        "_dist",
 		DefaultTargets: []string{"default"},
+		Exec:           &BuildCmds{},
 	}
 	body, err := io.ReadAll(f)
 	if err != nil {
