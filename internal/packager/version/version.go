@@ -92,6 +92,25 @@ func (v Version) IsExact() bool {
 	return v.Commits == 0 && !v.Dirty
 }
 
+// RCString returns the version in vM.m.(p+1)+rcN form when commits have been
+// made since the last tag.  On an exact clean tag it is identical to String().
+// On a dirty-only working tree (no new commits) it returns the tag with a
+// +dirty suffix without bumping the patch — there is no meaningful rc count.
+func (v Version) RCString() string {
+	if v.IsExact() {
+		return v.Version.Original()
+	}
+	if v.Commits == 0 {
+		// dirty only — no rc concept applies
+		return v.Version.Original() + "+dirty"
+	}
+	s := fmt.Sprintf("v%d.%d.%d+rc%d", v.Major(), v.Minor(), v.Patch()+1, v.Commits)
+	if v.Dirty {
+		s += ".dirty"
+	}
+	return s
+}
+
 // latestSemverTag iterates all refs/tags, picks the highest valid semver tag,
 // and returns both the parsed version and the commit hash it resolves to.
 func latestSemverTag(repo *git.Repository) (*semver.Version, plumbing.Hash, error) {

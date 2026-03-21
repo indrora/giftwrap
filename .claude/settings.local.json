@@ -5,7 +5,8 @@
       "mcp__gopls__go_workspace",
       "Bash(go build:*)",
       "mcp__gopls__go_vulncheck",
-      "mcp__gopls__go_diagnostics"
+      "mcp__gopls__go_diagnostics",
+      "WebSearch"
     ]
   }
 }

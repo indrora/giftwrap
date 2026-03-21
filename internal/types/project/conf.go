@@ -32,6 +32,12 @@ type Project struct {
 	// Accepts a string ("tar.gz") or a GOOS map ({default: tar.gz, windows: zip}).
 	// Built-in defaults: "zip" for windows, "tar.gz" for everything else.
 	ArchiveFormat ArchiveFormatConfig `yaml:"archiveFormat,omitempty"`
+	// NameTemplate is an optional Go text/template for the archive filename stem
+	// (without the format extension, which is always appended automatically).
+	// Available variables: .Name .Version .Major .Minor .Patch .OS .Arch
+	// .Target .Format .SingleDefault
+	// If unset, the default naming logic is used (backward-compatible).
+	NameTemplate string `yaml:"nameTemplate,omitempty"`
 	// Build configurations. Must have at least one.
 	Targets map[string]BuildConfig `yaml:"targets"`
 }

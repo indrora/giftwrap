@@ -66,7 +66,6 @@ func TestVersionString(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			if got := tc.v.String(); got != tc.want {
@@ -95,11 +94,59 @@ func TestIsExact(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			if got := tc.v.IsExact(); got != tc.want {
 				t.Errorf("IsExact() = %v, want %v", got, tc.want)
+			}
+		})
+	}
+}
+
+// ----------------------------------------------------------------------------
+// Version.RCString
+// ----------------------------------------------------------------------------
+
+func TestRCString(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		name string
+		v    Version
+		want string
+	}{
+		{
+			name: "exact clean tag — unchanged",
+			v:    Version{Version: mkv("v1.2.3")},
+			want: "v1.2.3",
+		},
+		{
+			name: "commits ahead clean — patch bumped",
+			v:    Version{Version: mkv("v1.2.3"), Commits: 5},
+			want: "v1.2.4+rc5",
+		},
+		{
+			name: "commits ahead and dirty",
+			v:    Version{Version: mkv("v1.2.3"), Commits: 3, Dirty: true},
+			want: "v1.2.4+rc3.dirty",
+		},
+		{
+			name: "dirty only — no patch bump",
+			v:    Version{Version: mkv("v1.2.3"), Dirty: true},
+			want: "v1.2.3+dirty",
+		},
+		{
+			name: "patch zero — bumps to 1",
+			v:    Version{Version: mkv("v2.1.0"), Commits: 1},
+			want: "v2.1.1+rc1",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			if got := tc.v.RCString(); got != tc.want {
+				t.Errorf("RCString() = %q, want %q", got, tc.want)
 			}
 		})
 	}
@@ -121,7 +168,6 @@ func TestShortHash(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		tc := tc
 		t.Run(tc.raw[:7], func(t *testing.T) {
 			t.Parallel()
 			if got := shortHash(plumbing.NewHash(tc.raw)); got != tc.want {
