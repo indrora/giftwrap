@@ -1,6 +1,10 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
+
 	"github.com/charmbracelet/log"
 	"github.com/indrora/giftwrap/internal/runner"
 	"github.com/indrora/giftwrap/internal/types/project"
@@ -10,22 +14,23 @@ import (
 var globProject *project.Project
 
 func LoadProject(cmd *cobra.Command, args []string) error {
-	// Load the project from disk
-
-	projectPath, err := getWrapfile()
+	absPath, f, err := getWrapfile()
 	if err != nil {
 		return err
 	}
+	defer f.Close()
 
-	// load it
+	dir := filepath.Dir(absPath)
+	if err := os.Chdir(dir); err != nil {
+		return fmt.Errorf("failed to change to project directory %s: %w", dir, err)
+	}
 
-	proj, err := project.LoadProject(projectPath)
+	proj, err := project.LoadProject(f, dir)
 	if err != nil {
 		return err
 	}
 
 	globProject = proj
-
 	return nil
 }
 

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/charmbracelet/log"
 	"github.com/indrora/giftwrap/internal"
@@ -35,12 +36,6 @@ var rootCmd = &cobra.Command{
 	},
 
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		b, err := getWrapfile()
-		if err != nil {
-			return err
-		}
-		*wrapfile = b
-
 		level, err := log.ParseLevel(*loglevel)
 
 		if err != nil {
@@ -83,29 +78,34 @@ func init() {
 }
 
 var wrapfileSearchPaths = []string{
-	"giftwrap.yml",
 	".wrapfile",
-	".giftwrap.yml",
+	"giftwrap.yml",
 	".github/giftwrap.yml",
 	".github/.wrapfile",
-	".github/giftwrap.yml",
+	".giftwrap.yml",
 }
 
-func getWrapfile() (string, error) {
-	// Check if wrapfile is empty or nil
-	if wrapfile == nil || *wrapfile == "" {
-		// It's empty. Look for one of the possible search strings
-		for _, s := range wrapfileSearchPaths {
-			_, e := os.Stat(s)
-			if e == nil {
-				return s, nil
-			} else if !errors.Is(e, os.ErrNotExist) {
-				*wrapfile = s
-				return s, e
-			}
-		}
-	} else {
-		return *wrapfile, nil
+// getWrapfile locates the wrapfile, opens it, and returns its absolute path
+// and an open file handle. The caller is responsible for closing the file.
+// Returns an error if no wrapfile can be found.
+func getWrapfile() (string, *os.File, error) {
+	paths := wrapfileSearchPaths
+	if wrapfile != nil && *wrapfile != "" {
+		paths = []string{*wrapfile}
 	}
-	return ".wrapfile", nil
+	for _, p := range paths {
+		f, err := os.Open(p)
+		if err == nil {
+			abs, err := filepath.Abs(p)
+			if err != nil {
+				f.Close()
+				return "", nil, err
+			}
+			return abs, f, nil
+		}
+		if !errors.Is(err, os.ErrNotExist) {
+			return "", nil, err
+		}
+	}
+	return "", nil, fmt.Errorf("no wrapfile found; run 'giftwrap init' to create one")
 }

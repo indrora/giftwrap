@@ -64,7 +64,11 @@ func doInit(cmd *cobra.Command, args []string) {
 	rootLogger.Debug("Generated config", "config", pp)
 
 	// Write out the file
-	o, err := os.Create(*wrapfile)
+	outPath := *wrapfile
+	if outPath == "" {
+		outPath = ".wrapfile"
+	}
+	o, err := os.Create(outPath)
 	if err != nil {
 		rootLogger.Fatalf("Error creating config: %v", err)
 	}

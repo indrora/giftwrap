@@ -3,7 +3,7 @@ package builder
 import (
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"slices"
 	"strings"
 
@@ -80,7 +80,7 @@ func (b *Builder) BuildTarget(target, variantName string) error {
 		return fmt.Errorf("No such variant %s", variantName)
 	}
 
-	buildpath := path.Join(b.proj.BuildDir, internal.Slugify(target), internal.Slugify(variantName))
+	buildpath := filepath.Join(b.proj.BuildDir, internal.Slugify(target), internal.Slugify(variantName))
 
 	varsplit := strings.SplitN(variantName, "/", 2)
 

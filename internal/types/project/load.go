@@ -3,34 +3,19 @@ package project
 import (
 	"fmt"
 	"io"
-	"os"
-	"path/filepath"
 
 	"go.yaml.in/yaml/v4"
 )
 
-func LoadProject(path string) (*Project, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	// Get the real path of the file
-	fullpath, err := filepath.Abs(path)
-	rootDir := filepath.Dir(fullpath)
-	if err != nil {
-		return nil, err
-	}
-
+func LoadProject(r io.Reader, dir string) (*Project, error) {
 	project := &Project{
-		Path:           rootDir,
+		Path:           dir,
 		BuildDir:       "_build",
 		DistDir:        "_dist",
 		DefaultTargets: []string{"default"},
 		Exec:           &BuildCmds{},
 	}
-	body, err := io.ReadAll(f)
+	body, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}
