@@ -2,7 +2,6 @@ package builder
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"path"
 	"slices"
@@ -16,13 +15,10 @@ import (
 // Builder is the interface that generates commands to run and their environment.
 
 type Builder struct {
-	proj      project.Project
-	outWriter io.Writer
-	errWriter io.Writer
-	runner    runner.Runner
-	runOpts   runner.Options
-	Shell     string
-
+	proj        project.Project
+	runner      runner.Runner
+	runOpts     runner.Options
+	Shell       string
 	realTargets map[string]project.BuildConfig
 }
 
@@ -46,13 +42,6 @@ func NewBuilder(p project.Project, r runner.Runner, o runner.Options) (*Builder,
 	}
 
 	return b, nil
-}
-
-func (b *Builder) SetIO(out, err io.Writer) {
-	b.errWriter = err
-	b.outWriter = out
-	b.runOpts.Stdout = out
-	b.runOpts.Stderr = err
 }
 
 func (b *Builder) Setup() error {
@@ -116,21 +105,24 @@ func (b *Builder) BuildTarget(target, variantName string) error {
 		return fmt.Errorf("failed creating output directory for %s (%s): %v", target, variantName, err)
 	}
 
-	flags, err := internal.SplitArgs(*config.BuildFlags)
-	if err != nil {
-		return fmt.Errorf("failed to parse build flags for %s (%s): %v", target, variantName, err)
-	}
-
 	args := []string{
 		"build", "-o", buildpath,
 	}
 
-	if len(config.BuildTags) > 0 {
-		args = append(args, "-tags", strings.Join(config.BuildTags, ","))
+	if config.BuildFlags != nil {
+
+		flags, err := internal.SplitArgs(*config.BuildFlags)
+		if err != nil {
+			return fmt.Errorf("failed to parse build flags for %s (%s): %v", target, variantName, err)
+		}
+
+		if len(flags) > 0 {
+			args = append(args, flags...)
+		}
 	}
 
-	if len(flags) > 0 {
-		args = append(args, flags...)
+	if len(config.BuildTags) > 0 {
+		args = append(args, "-tags", strings.Join(config.BuildTags, ","))
 	}
 
 	args = append(args, config.Package)
@@ -148,7 +140,7 @@ func (b *Builder) BuildTarget(target, variantName string) error {
 
 	err = config.Exec.PostExec.Run(b.runner, opts)
 	if err != nil {
-		return fmt.Errorf("Failed post-exec stage for %s (%s): %v", target, variantName, err)
+		return fmt.Errorf("failed post-exec stage for %s (%s): %v", target, variantName, err)
 	}
 
 	return nil
@@ -162,7 +154,7 @@ func (b *Builder) Teardown() error {
 		WithEnv(b.proj.Environment)
 
 	if err := b.proj.Exec.PostExec.Run(b.runner, opts); err != nil {
-		return fmt.Errorf("Failed pre-exec stage: %v ", err)
+		return fmt.Errorf("failed post-exec stage:%v ", err)
 	}
 	return nil
 }

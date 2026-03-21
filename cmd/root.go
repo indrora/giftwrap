@@ -9,6 +9,8 @@ import (
 	"os"
 
 	"github.com/charmbracelet/log"
+	"github.com/indrora/giftwrap/internal"
+	"github.com/indrora/giftwrap/internal/runner"
 	"github.com/spf13/cobra"
 )
 
@@ -53,6 +55,10 @@ var rootCmd = &cobra.Command{
 			ReportCaller:    show_caller,
 		})
 
+		globalRunnerOpts = runner.NewOptions().
+			WithStdout(internal.NewLogWriter(rootLogger, StdoutLevel)).
+			WithStderr(internal.NewLogWriter(rootLogger, StderrLevel))
+
 		rootLogger.Print("G I F T W R A P !")
 
 		return nil
@@ -77,11 +83,11 @@ func init() {
 }
 
 var wrapfileSearchPaths = []string{
-	".wrapfile",
 	"giftwrap.yml",
+	".wrapfile",
+	".giftwrap.yml",
 	".github/giftwrap.yml",
 	".github/.wrapfile",
-	".giftwrap.yml",
 	".github/giftwrap.yml",
 }
 

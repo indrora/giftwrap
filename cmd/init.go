@@ -6,9 +6,9 @@ package cmd
 import (
 	_ "embed"
 	"errors"
-	"log"
 	"os"
 
+	"github.com/charmbracelet/log"
 	"github.com/indrora/giftwrap/internal/types"
 	"github.com/indrora/giftwrap/internal/types/project"
 	"github.com/spf13/cobra"
@@ -97,4 +97,5 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// initCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+
 }

@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"github.com/charmbracelet/log"
+	"github.com/indrora/giftwrap/internal/runner"
 	"github.com/indrora/giftwrap/internal/types/project"
 	"github.com/spf13/cobra"
 )
@@ -26,3 +28,14 @@ func LoadProject(cmd *cobra.Command, args []string) error {
 
 	return nil
 }
+
+var globalRunnerOpts runner.Options
+
+func init() {
+
+}
+
+const (
+	StdoutLevel = log.WarnLevel
+	StderrLevel = log.ErrorLevel
+)
