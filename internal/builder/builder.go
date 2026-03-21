@@ -116,7 +116,26 @@ func (b *Builder) BuildTarget(target, variantName string) error {
 		return fmt.Errorf("failed creating output directory for %s (%s): %v", target, variantName, err)
 	}
 
-	err = b.runner.RunArgs("go", []string{"build", "-o", buildpath, config.Package}, opts)
+	flags, err := internal.SplitArgs(*config.BuildFlags)
+	if err != nil {
+		return fmt.Errorf("failed to parse build flags for %s (%s): %v", target, variantName, err)
+	}
+
+	args := []string{
+		"build", "-o", buildpath,
+	}
+
+	if len(config.BuildTags) > 0 {
+		args = append(args, "-tags", strings.Join(config.BuildTags, ","))
+	}
+
+	if len(flags) > 0 {
+		args = append(args, flags...)
+	}
+
+	args = append(args, config.Package)
+
+	err = b.runner.RunArgs("go", args, opts)
 	if err != nil {
 		return fmt.Errorf("build failed for %s (%s): %v", target, variantName, err)
 	}

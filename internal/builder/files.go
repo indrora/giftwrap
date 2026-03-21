@@ -62,7 +62,11 @@ func copyFiles(specs []types.FileSpec, destDir string, fsys fs.FS) error {
 					relPath = strings.TrimPrefix(matchPath, base+"/")
 				}
 			}
-			destPath := filepath.Join(destDir, spec.Dest, relPath)
+			relDest := filepath.Join(spec.Dest, relPath)
+			if !fs.ValidPath(filepath.ToSlash(relDest)) {
+				return fmt.Errorf("dest path %q escapes build directory", relDest)
+			}
+			destPath := filepath.Join(destDir, relDest)
 			if err := os.MkdirAll(filepath.Dir(destPath), os.ModePerm); err != nil {
 				return fmt.Errorf("mkdir for %q: %w", destPath, err)
 			}

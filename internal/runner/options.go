@@ -27,9 +27,8 @@ func (o Options) WithSysEnv() Options {
 	sysEnvMap := make(map[string]string)
 
 	for _, v := range sysEnv {
-		// Split the line on the first '='
-		parts := strings.SplitN(v, "=", 2)
-		sysEnvMap[parts[0]] = parts[1]
+		key, val, _ := strings.Cut(v, "=")
+		sysEnvMap[key] = val
 	}
 
 	maps.Insert(o.Env, maps.All(sysEnvMap))

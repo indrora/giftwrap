@@ -29,8 +29,8 @@ func TestExecRunner_Success(t *testing.T) {
 	out := opts.Stdout.(*bytes.Buffer).String()
 	errOut := opts.Stderr.(*bytes.Buffer).String()
 
-	if out != "" {
-		t.Errorf("expected no stdout on success, got %q", out)
+	if out == "" {
+		t.Errorf("expected text on stdout, got nothing.")
 	}
 	if errOut != "" {
 		t.Errorf("expected no stderr on success, got %q", errOut)
