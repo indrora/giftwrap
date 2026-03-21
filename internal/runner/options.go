@@ -23,21 +23,21 @@ func NewOptions() Options {
 }
 
 func (o Options) WithSysEnv() Options {
-	sysEnv := os.Environ()
-	sysEnvMap := make(map[string]string)
-
-	for _, v := range sysEnv {
+	newEnv := make(map[string]string, len(o.Env))
+	for _, v := range os.Environ() {
 		key, val, _ := strings.Cut(v, "=")
-		sysEnvMap[key] = val
+		newEnv[key] = val
 	}
-
-	maps.Insert(o.Env, maps.All(sysEnvMap))
-
+	maps.Insert(newEnv, maps.All(o.Env)) // existing entries override system env
+	o.Env = newEnv
 	return o
 }
 
 func (o Options) WithEnv(env map[string]string) Options {
-	maps.Insert(o.Env, maps.All(env))
+	newEnv := make(map[string]string, len(o.Env)+len(env))
+	maps.Insert(newEnv, maps.All(o.Env))
+	maps.Insert(newEnv, maps.All(env))
+	o.Env = newEnv
 	return o
 }
 
