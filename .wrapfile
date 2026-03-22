@@ -10,6 +10,8 @@ exec:
   post:
     - echo "post-exec global"
     - echo "$foo is foo"
+  post.windows:
+    - echo Built on windows OK
 targets:
   default:
     env:
@@ -26,6 +28,9 @@ targets:
       pre:
         - echo "pre-exec for target, building $GOOS + $GOARCH"
         - echo "$whatnot"
+      pre.windows:
+        - echo Building in %BUILD_PATH%
       post:
         - echo "post-exec for target"
         - echo "foo is $foo and whatnot is $whatnot"
+      post.windows:
