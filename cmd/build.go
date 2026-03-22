@@ -14,7 +14,7 @@ import (
 var buildCmd = &cobra.Command{
 	Use:     "build",
 	Short:   "Build the project",
-	Long:    `;)`,
+	Long:    `build compiles each configured target variant for the specified GOOS/GOARCH pairs. If no target name is given, the default target is used.`,
 	Run:     doBuild,
 	PreRunE: LoadProject,
 }

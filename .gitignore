@@ -1,3 +1,6 @@
 giftwrap
 _build/**
 _dist/**
+_doc/public/**
+_doc/.hugo_build.lock
+docgen

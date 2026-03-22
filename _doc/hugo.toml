@@ -1,0 +1,40 @@
+baseurl = "/"
+languageCode = "en-us"
+title = "giftwrap"
+theme = "terminal"
+pagination.pagerSize = 10
+
+[markup.highlight]
+noClasses = false
+
+[params]
+  contentTypeName = "docs"
+  showMenuItems = 3
+  fullWidthTheme = false
+  centerTheme = true
+  themeColor = "green"
+  showLanguageSelector = false
+  subtitle = "Cross-compile and package Go releases."
+
+[params.logo]
+  logoText = "giftwrap"
+  logoHomeLink = "/"
+
+[[menu.main]]
+  identifier = "quickstart"
+  name = "Quickstart"
+  url = "/docs/quickstart/"
+  weight = 1
+
+[[menu.main]]
+  identifier = "wrapfile"
+  name = "Wrapfile"
+  url = "/docs/wrapfile/"
+  weight = 2
+
+[[menu.main]]
+  identifier = "cli"
+  name = "CLI"
+  url = "/docs/cli/"
+  weight = 3
+
