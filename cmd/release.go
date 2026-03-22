@@ -49,7 +49,7 @@ func doRelease(cmd *cobra.Command, args []string) {
 	for _, targetName := range args {
 		rootLogger.Info("releasing target", "target", targetName)
 
-		for _, variant := range globProject.Targets[targetName].Targets {
+		for _, variant := range globProject.Targets[targetName].Platforms {
 			rootLogger.Info("building variant", "variant", variant)
 
 			if err := b.BuildTarget(targetName, variant); err != nil {

@@ -49,7 +49,7 @@ env:
 targets:
   default:
     package: .
-    targets:
+    platforms:
       - linux/amd64
       - darwin/arm64
       - windows/amd64
@@ -64,7 +64,7 @@ Each entry under `targets` is a named build configuration. The name is used on t
 `targets.<name>.package`
 : **Required.** Go package path passed to `go build`. Use `.` for the module root, or a full import path for a subdirectory.
 
-`targets.<name>.targets`
+`targets.<name>.platforms`
 : **Required.** One or more `GOOS/GOARCH` pairs. Accepts a single string or a list of strings. Any pair listed by `go tool dist list` is valid.
 
 `targets.<name>.env`
@@ -83,7 +83,7 @@ Each entry under `targets` is a named build configuration. The name is used on t
 targets:
   default:
     package: .
-    targets:
+    platforms:
       - linux/amd64
       - linux/arm64
       - darwin/arm64
@@ -97,7 +97,7 @@ targets:
 
   with-cgo:
     package: ./cmd/native
-    targets: linux/amd64
+    platforms: linux/amd64
     cgo: true
 ```
 
@@ -172,7 +172,7 @@ exec:
 targets:
   default:
     package: .
-    targets:
+    platforms:
       - linux/amd64
       - windows/amd64
     exec:

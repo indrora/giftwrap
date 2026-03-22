@@ -15,8 +15,8 @@ type BuildConfig struct {
 	Exec *BuildCmds `yaml:"exec,omitempty"`
 	// Package to build (REQUIRED)
 	Package string `yaml:"package"`
-	// Targets to build for (REQUIRED)
-	Targets []string `yaml:"targets"`
+	// Platforms to build for (GOOS/GOARCH pairs, REQUIRED)
+	Platforms []string `yaml:"platforms"`
 	// Additional files to copy into each variant's output directory after build.
 	// Supports doublestar glob patterns. See types.FileSpec for YAML forms.
 	AdditionalFiles []types.FileSpec `yaml:"include,omitempty"`

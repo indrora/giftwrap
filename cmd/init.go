@@ -9,7 +9,6 @@ import (
 	"os"
 
 	"github.com/charmbracelet/log"
-	"github.com/indrora/giftwrap/internal/types"
 	"github.com/indrora/giftwrap/internal/types/project"
 	"github.com/spf13/cobra"
 	"go.yaml.in/yaml/v4"
@@ -56,7 +55,7 @@ func doInit(cmd *cobra.Command, args []string) {
 		Targets: map[string]project.BuildConfig{
 			"default": project.BuildConfig{
 				Package: f.Module.Mod.Path,
-				Targets: types.CommandList{"linux/arm64", "linux/amd64", "darwin/arm64", "darwin/amd64", "windows/arm64", "windows/amd64"},
+				Platforms: []string{"linux/arm64", "linux/amd64", "darwin/arm64", "darwin/amd64", "windows/arm64", "windows/amd64"},
 			},
 		},
 	}

@@ -17,7 +17,7 @@ targets:
     env:
       foo: "asdfasdf"
     package: github.com/indrora/giftwrap
-    targets:
+    platforms:
     - linux/arm64
     - linux/amd64
     - darwin/arm64

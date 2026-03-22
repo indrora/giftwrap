@@ -94,7 +94,7 @@ func (p *Project) ReifyConfig(target string) (*BuildConfig, error) {
 	if buildconfig.Package == "" {
 		return nil, NoPackageErr
 	}
-	if len(buildconfig.Targets) < 1 {
+	if len(buildconfig.Platforms) < 1 {
 		return nil, NoTargetsErr
 	}
 

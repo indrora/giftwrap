@@ -26,7 +26,7 @@ name: MyProject
 targets:
   default:
     package: github.com/example/myapp
-    targets:
+    platforms:
       - linux/arm64
       - linux/amd64
       - darwin/arm64
@@ -35,7 +35,7 @@ targets:
       - windows/amd64
 ```
 
-Edit `name` to match your project. Remove any `targets` entries for platforms you don't need.
+Edit `name` to match your project. Remove any `platforms` entries you don't need.
 
 ## 2. Build
 
@@ -93,7 +93,7 @@ include:
 targets:
   default:
     package: .
-    targets:
+    platforms:
       - linux/amd64
       - darwin/arm64
       - windows/amd64
@@ -109,7 +109,7 @@ name: myapp
 targets:
   default:
     package: .
-    targets:
+    platforms:
       - linux/amd64
       - darwin/arm64
       - windows/amd64

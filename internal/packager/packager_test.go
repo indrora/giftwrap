@@ -20,7 +20,7 @@ func makeTestProject(t *testing.T) project.Project {
 		Targets: map[string]project.BuildConfig{
 			"default": {
 				Package: ".",
-				Targets: []string{"linux/amd64"},
+				Platforms: []string{"linux/amd64"},
 				Exec:    &project.BuildCmds{},
 			},
 		},

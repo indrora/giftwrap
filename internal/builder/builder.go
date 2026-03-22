@@ -75,7 +75,7 @@ func (b *Builder) BuildTarget(target, variantName string) error {
 		return fmt.Errorf("no such target %s", target)
 	}
 
-	ok = slices.Contains(config.Targets, variantName)
+	ok = slices.Contains(config.Platforms, variantName)
 	if !ok {
 		return fmt.Errorf("No such variant %s", variantName)
 	}

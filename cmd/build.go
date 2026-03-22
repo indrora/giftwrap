@@ -50,7 +50,7 @@ func doBuild(cmd *cobra.Command, args []string) {
 	for _, v := range args {
 		rootLogger.Info("Building target", "target", v)
 
-		for _, a := range globProject.Targets[v].Targets {
+		for _, a := range globProject.Targets[v].Platforms {
 			rootLogger.Info("building machine", "machine", a)
 			err = builder.BuildTarget(v, a)
 			if err != nil {

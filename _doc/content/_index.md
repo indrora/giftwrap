@@ -10,7 +10,7 @@ name: myapp
 targets:
   default:
     package: .
-    targets:
+    platforms:
       - linux/amd64
       - darwin/arm64
       - windows/amd64
