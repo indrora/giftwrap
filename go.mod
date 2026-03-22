@@ -5,9 +5,9 @@ go 1.25.5
 tool github.com/spf13/cobra-cli
 
 require (
+	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/bmatcuk/doublestar/v4 v4.10.0
 	github.com/charmbracelet/log v0.4.2
-	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/go-git/go-git/v5 v5.17.0
 	github.com/klauspost/compress v1.18.5
 	github.com/spf13/cobra v1.10.2
@@ -27,6 +27,7 @@ require (
 	github.com/cloudflare/circl v1.6.1 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.6 // indirect
 	github.com/cyphar/filepath-securejoin v0.4.1 // indirect
+	github.com/earthboundkid/versioninfo/v2 v2.24.1 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
 	github.com/go-git/go-billy/v5 v5.8.0 // indirect

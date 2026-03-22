@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/charmbracelet/log"
+	"github.com/earthboundkid/versioninfo/v2"
 	"github.com/indrora/giftwrap/internal"
 	"github.com/indrora/giftwrap/internal/runner"
 	"github.com/spf13/cobra"
@@ -54,7 +55,7 @@ var rootCmd = &cobra.Command{
 			WithStdout(internal.NewLogWriter(rootLogger, StdoutLevel)).
 			WithStderr(internal.NewLogWriter(rootLogger, StderrLevel))
 
-		rootLogger.Print("G I F T W R A P !")
+		rootLogger.Info("giftwrap run", "version", versioninfo.Short())
 
 		return nil
 	},

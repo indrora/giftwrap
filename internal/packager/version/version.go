@@ -38,7 +38,7 @@ func GetVersion(repoPath string) (Version, error) {
 
 	sv, tagHash, err := latestSemverTag(repo)
 	if err != nil {
-		return Version{}, err
+		return Version{}, fmt.Errorf("semver issue: %T -> %v", err, err)
 	}
 
 	commits, err := commitsSince(repo, tagHash, head.Hash())
@@ -145,7 +145,9 @@ func latestSemverTag(repo *git.Repository) (*semver.Version, plumbing.Hash, erro
 		return nil, plumbing.ZeroHash, err
 	}
 	if latest == nil {
-		return nil, plumbing.ZeroHash, fmt.Errorf("version: no semver tags found in repository")
+		// Semer allows "we don't know" to be called 0.1.0
+		return semver.New(0, 1, 0, "", ""), latestHash, nil
+		//		return nil, plumbing.ZeroHash, fmt.Errorf("version: no semver tags found in repository")
 	}
 	return latest, latestHash, nil
 }

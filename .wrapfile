@@ -1,4 +1,5 @@
 name: giftwrap
+nameTemplate: "{{.Name}}-{{.Version}}-{{.OS}}-{{.Arch}}"
 env:
   foo: bar
   whatnot: This is a long string
