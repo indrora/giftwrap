@@ -17,65 +17,35 @@ You can also specify a path explicitly: `giftwrap --wrapfile path/to/file.yml`.
 
 ---
 
-## General usage
+## Top-level configuration
 
-### `name`
+`name`
+: **Required.** Project name, used in output filenames and directory names.
 
-**Required.** The project name, used to form output filenames and directory names.
+`buildPath`
+: **Optional. Default: `_build`.** Directory where compiled binaries are written. Subdirectories are created per variant: `<buildPath>/<os>-<arch>/`.
+
+`distPath`
+: **Optional. Default: `_dist`.** Directory for release archives produced by `giftwrap release`.
+
+`defaultTarget`
+: **Optional. Default: `default`.** Target name to build when none is given on the command line. Must match a key in `targets`.
+
+`env`
+: **Optional.** Project-wide environment variables. Applied to all `go build` invocations and hook commands. Target-level `env` overrides project-level on key collision.
+
+`targets`
+: **Required.** Map of named build configurations. At least one entry is required.
 
 ```yaml
 name: myapp
-```
+buildPath: _build
+distPath: _dist
+defaultTarget: default
 
----
-
-### `buildPath`
-
-**Optional. Default: `_build`.** Directory where compiled binaries are written. giftwrap creates a subdirectory per variant: `<buildPath>/<os>-<arch>/`.
-
-```yaml
-buildPath: _output/build
-```
-
----
-
-### `distPath`
-
-**Optional. Default: `_dist`.** Directory for release archives produced by `giftwrap release`.
-
-```yaml
-distPath: _output/dist
-```
-
----
-
-### `defaultTarget`
-
-**Optional. Default: `default`.** Name of the target to build when none is given on the command line. Must match a key in `targets`.
-
-```yaml
-defaultTarget: release
-```
-
----
-
-### `env`
-
-**Optional.** Environment variables applied to all pre/post commands and `go build` invocations. Target-level `env` overrides project-level entries for the same key.
-
-```yaml
 env:
-  VERSION: "1.2.3"
-  CGO_ENABLED: "0"
-```
+  VERSION: "1.0.0"
 
----
-
-### `targets`
-
-**Required.** A map of named build configurations. Each key is used on the command line: `giftwrap build <name>`.
-
-```yaml
 targets:
   default:
     package: .
@@ -87,29 +57,27 @@ targets:
 
 ---
 
-### `targets.<name>.package`
+## Target configuration
 
-**Required.** The Go package path passed to `go build`. Use `.` for the module root.
+Each entry under `targets` is a named build configuration. The name is used on the command line (`giftwrap build <name>`) and in output paths.
 
-```yaml
-targets:
-  default:
-    package: .
-    targets: linux/amd64
-```
+`targets.<name>.package`
+: **Required.** Go package path passed to `go build`. Use `.` for the module root, or a full import path for a subdirectory.
 
-```yaml
-targets:
-  mycmd:
-    package: ./cmd/mycmd
-    targets: linux/amd64
-```
+`targets.<name>.targets`
+: **Required.** One or more `GOOS/GOARCH` pairs. Accepts a single string or a list of strings. Any pair listed by `go tool dist list` is valid.
 
----
+`targets.<name>.env`
+: **Optional.** Target-specific environment variables. Merged with project `env`; target values win on collision.
 
-### `targets.<name>.targets`
+`targets.<name>.flags`
+: **Optional.** Arbitrary flags appended to the `go build` command line.
 
-**Required.** One or more `GOOS/GOARCH` pairs to build. Any pair listed by `go tool dist list` is valid. Accepts a single string or a list of strings.
+`targets.<name>.tags`
+: **Optional.** Build tags, passed as `-tags`. Accepts a single string or a list of strings.
+
+`targets.<name>.cgo`
+: **Optional. Default: `false`.** Enables CGo. When `false`, giftwrap sets `CGO_ENABLED=0` automatically.
 
 ```yaml
 targets:
@@ -118,66 +86,17 @@ targets:
     targets:
       - linux/amd64
       - linux/arm64
-      - darwin/amd64
       - darwin/arm64
       - windows/amd64
-```
-
----
-
-### `targets.<name>.env`
-
-**Optional.** Environment variables for this target. Merged with project-level `env`; target values win on collision.
-
-```yaml
-targets:
-  release:
-    package: .
-    targets: linux/amd64
     env:
       GOFLAGS: "-trimpath"
-```
-
----
-
-### `targets.<name>.flags`
-
-**Optional.** Arbitrary flags appended to the `go build` command line.
-
-```yaml
-targets:
-  release:
-    package: .
-    targets: linux/amd64
     flags: "-ldflags=-s -w"
-```
-
----
-
-### `targets.<name>.tags`
-
-**Optional.** Build tags passed as `-tags` to `go build`. Accepts a single string or a list of strings.
-
-```yaml
-targets:
-  with-sqlite:
-    package: .
-    targets: linux/amd64
     tags:
-      - sqlite
       - netgo
-```
+    cgo: false
 
----
-
-### `targets.<name>.cgo`
-
-**Optional. Default: `false`.** Whether to enable CGo. When `false`, giftwrap sets `CGO_ENABLED=0` automatically.
-
-```yaml
-targets:
-  native:
-    package: .
+  with-cgo:
+    package: ./cmd/native
     targets: linux/amd64
     cgo: true
 ```
@@ -186,79 +105,70 @@ targets:
 
 ## Shell actions
 
-Pre/post hooks run shell commands before and after each build. The OS qualifier on `exec.pre.<os>` and `exec.post.<os>` refers to the **host OS** — the machine running giftwrap — not the `GOOS` of the build target.
+Hook commands run in a shell on the **host machine** — the OS running giftwrap. The `.<os>` qualifier on any hook key refers to the host OS, not the `GOOS` build target.
 
-The following variables are available in all hook commands:
+### Execution order
+
+For each `giftwrap build` or `giftwrap release` run:
+
+1. Project `exec.pre[.<host-os>]` runs
+2. For each `GOOS/GOARCH` variant:
+   1. Target `exec.pre[.<host-os>]` runs
+   2. `go build` runs
+   3. Target `exec.post[.<host-os>]` runs
+3. Project `exec.post[.<host-os>]` runs
+
+The following variables are set automatically and available in all hook commands:
 
 | Variable | Value |
 |----------|-------|
-| `GOOS` | Target OS being built (e.g. `linux`) |
-| `GOARCH` | Target architecture being built (e.g. `amd64`) |
+| `GOOS` | The target OS being built (e.g. `linux`) |
+| `GOARCH` | The target architecture (e.g. `amd64`) |
 | `BUILD_PATH` | Output directory for this variant |
 | `BUILD_TARGET` | Name of the current target |
 
----
+### Shell configuration
 
-### `shell`
+`shell`
+: **Optional.** Map of host OS name → shell invocation string. Resolution order: exact OS match → `unix` → built-in default (`sh -c` on non-Windows, `cmd /c` on Windows).
 
-**Optional.** Configures which shell is used to run hook commands. Keys are `runtime.GOOS` values or the special key `unix` (any non-Windows OS).
-
-Resolution order:
-1. Exact OS match (`linux`, `darwin`, `windows`, `plan9`, …)
-2. `unix`
-3. Built-in default: `sh -c` on non-Windows, `cmd /c` on Windows
+`shell.<os>`
+: A single OS entry. `<os>` is any `runtime.GOOS` value. The special key `unix` matches all non-Windows platforms.
 
 ```yaml
 shell:
   unix: bash -c
-  darwin: zsh -c
+  darwin: zsh -c        # overrides unix on macOS
   windows: powershell -Command
 ```
 
----
+### Hooks
 
-### `exec`
+`exec.pre` / `exec.post`
+: Project-level hooks. Run **once per build**, before or after all variants. Accepts a single string or a list of strings.
 
-**Optional.** Hooks that run **once per build**, around the entire set of variants. Use `targets.<name>.exec` for hooks that run once per variant.
+`exec.pre.<os>` / `exec.post.<os>`
+: OS-qualified project hooks. `<os>` is any `runtime.GOOS` value or `unix`. Resolution: exact OS → `unix` → unqualified key.
 
----
+`targets.<name>.exec.pre` / `targets.<name>.exec.post`
+: Target-level hooks. Run **once per variant** (once per `GOOS/GOARCH` pair).
 
-### `exec.pre` / `exec.post`
-
-Commands to run before or after the build. Accepts a single string or a list of strings.
+`targets.<name>.exec.pre.<os>` / `targets.<name>.exec.post.<os>`
+: OS-qualified target hooks. Same resolution order as project-level.
 
 ```yaml
+# Project-level: runs once, wraps the whole build
 exec:
   pre:
     - go generate ./...
-    - echo "starting build"
-  post: echo "all variants built"
-```
-
----
-
-### `exec.pre.<os>` / `exec.post.<os>`
-
-Host-OS-specific variant of `exec.pre` or `exec.post`. `<os>` is any `runtime.GOOS` value, or `unix` (any non-Windows host).
-
-Resolution order for each hook: exact OS match → `unix` → unqualified key.
-
-```yaml
-exec:
   pre.unix:
-    - chmod +x scripts/prepare.sh
-    - ./scripts/prepare.sh
-  pre.windows: scripts\prepare.bat
-  post.darwin: codesign --deep $BUILD_PATH
+    - chmod +x scripts/sign.sh
+  pre.windows: scripts\codegen.bat
+  post: echo "build complete"
 ```
 
----
-
-### `targets.<name>.exec`
-
-**Optional.** Hooks scoped to a specific target. These run **once per variant** (once per `GOOS/GOARCH` pair), unlike project-level `exec` which runs once per build. Supports the same `pre`, `pre.<os>`, `post`, `post.<os>` keys.
-
 ```yaml
+# Target-level: runs once per GOOS/GOARCH variant
 targets:
   default:
     package: .
@@ -268,128 +178,66 @@ targets:
     exec:
       pre: echo "building $BUILD_TARGET for $GOOS/$GOARCH"
       post.windows: sign.bat %BUILD_PATH%
+      post.darwin: codesign --deep $BUILD_PATH
 ```
 
 ---
 
-## Release filename templates
+## Release archives
 
-By default, `giftwrap release` names archives as:
+`archiveFormat`
+: **Optional. Default: `zip` on Windows, `tar.gz` on all other platforms.** Format for archives produced by `giftwrap release`. Valid values: `tar.gz`, `tar.zst`, `zip`. Accepts a scalar string or a map of host OS → format. The `default` key in a map applies to platforms not otherwise listed.
 
-```
-<projectName>-<targetName>-<goos>-<goarch>.<format>
-```
+`targets.<name>.archiveFormat`
+: **Optional.** Overrides the project-level `archiveFormat` for a specific target.
 
-When there is exactly one target and it is named `default`, the target name is omitted:
-
-```
-<projectName>-<goos>-<goarch>.<format>
-```
-
----
-
-### `nameTemplate`
-
-**Optional.** A Go [`text/template`](https://pkg.go.dev/text/template) string that overrides the archive filename. The format extension is always appended automatically.
-
-Available variables:
-
-| Variable | Value |
-|----------|-------|
-| `.Name` | Project name |
-| `.Version` | Full version string (e.g. `v1.2.3` or `v1.2.3+4.gabc1234`) |
-| `.VersionRC` | Release-candidate form; same as `.Version` on an exact tag |
-| `.Major` | Major version number |
-| `.Minor` | Minor version number |
-| `.Patch` | Patch version number |
-| `.Commits` | Commits ahead of the last semver tag (0 = exact tag) |
-| `.OS` | Target GOOS |
-| `.Arch` | Target GOARCH |
-| `.Target` | Target name from the wrapfile |
-| `.Format` | Archive format extension (e.g. `tar.gz`) |
-
-```yaml
-nameTemplate: "{{.Name}}-{{.Version}}-{{.OS}}-{{.Arch}}"
-```
-
-Produces: `myapp-v1.2.3-linux-amd64.tar.gz`
-
----
-
-### `archiveFormat`
-
-**Optional. Default: `zip` on Windows, `tar.gz` on all other platforms.** Format for release archives. Valid values: `tar.gz`, `tar.zst`, `zip`.
-
-Scalar form applies to all platforms:
-
-```yaml
-archiveFormat: tar.gz
-```
-
-Map form sets per-platform formats. The `default` key applies to platforms not otherwise listed:
+`nameTemplate`
+: **Optional.** Go [`text/template`](https://pkg.go.dev/text/template) string controlling archive filenames. The format extension is always appended automatically. When absent, archives are named `<name>-<target>-<goos>-<goarch>.<format>` (target name omitted when there is exactly one target named `default`).
 
 ```yaml
 archiveFormat:
   default: tar.gz
   windows: zip
   linux: tar.zst
+
+nameTemplate: "{{.Name}}-{{.Version}}-{{.OS}}-{{.Arch}}"
+# produces: myapp-v1.2.3-linux-amd64.tar.gz
 ```
 
+Variables available in `nameTemplate`:
+
+| Variable | Value |
+|----------|-------|
+| `.Name` | Project name |
+| `.Version` | Full version string (e.g. `v1.2.3` or `v1.2.3+4.gabc1234`) |
+| `.VersionRC` | Release-candidate form; same as `.Version` on an exact tag |
+| `.Major` / `.Minor` / `.Patch` | Numeric version components |
+| `.Commits` | Commits ahead of the last semver tag (0 on an exact tag) |
+| `.OS` | Target GOOS |
+| `.Arch` | Target GOARCH |
+| `.Target` | Target name from the wrapfile |
+| `.Format` | Archive format extension (e.g. `tar.gz`) |
+
 ---
 
-### `targets.<name>.archiveFormat`
+## Additional files
 
-**Optional.** Overrides the project-level `archiveFormat` for a specific target. Same scalar or map form.
+Use `include` to copy files into each variant's output directory before it is packaged. Project-level entries are applied first; target-level entries are appended after.
 
----
+`include`
+: **Optional.** Project-wide list of file specs. Copied into every variant's output directory.
 
-## Additional files in release
+`targets.<name>.include`
+: **Optional.** Target-specific file specs. Appended after project `include` entries.
 
-Use `include` to copy extra files into each variant's output directory before it is packaged. Project-level `include` entries are applied first; target-level entries are appended after.
-
----
-
-### `include`
-
-**Optional.** Files or glob patterns to copy into every variant's output directory.
-
-A plain string copies matching files preserving their relative paths:
+A plain string copies matching files preserving their relative paths. The mapping form (`src`/`dest`) remaps files to a destination subdirectory — the non-wildcard prefix of `src` is stripped before prepending `dest`. Glob patterns follow [doublestar](https://github.com/bmatcuk/doublestar) syntax.
 
 ```yaml
 include:
-  - README.md
+  - README.md           # copied as README.md
   - LICENSE
-  - docs/**
-```
-
----
-
-### `include[*].src` / `include[*].dest`
-
-To remap files to a different destination, use the mapping form. The non-wildcard prefix of `src` is stripped before prepending `dest` — similar to rsync's trailing-slash behavior.
-
-```yaml
-include:
-  - src: assets/**     # assets/logo.png → res/logo.png
-    dest: res/
-  - src: "*.md"        # README.md → docs/README.md
-    dest: docs/
-```
-
-Glob patterns follow [doublestar](https://github.com/bmatcuk/doublestar) syntax: `**`, `*`, `?`, `[range]`.
-
----
-
-### `targets.<name>.include`
-
-**Optional.** Additional files for a specific target's variants. Appended after any project-level `include` entries.
-
-```yaml
-targets:
-  default:
-    package: .
-    targets: linux/amd64
-    include:
-      - src: scripts/run.sh
-        dest: bin/
+  - src: docs/**        # docs/guide.md → documentation/guide.md
+    dest: documentation/
+  - src: "*.md"         # README.md → extra/README.md
+    dest: extra/
 ```
