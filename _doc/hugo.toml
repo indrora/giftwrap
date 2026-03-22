@@ -22,6 +22,7 @@ noClasses = false
   updateDatePrefix = "last update:"
   Toc = true 
   owner = "indrora"
+  githubRepo = "https://github.com/indrora/giftwrap"
   
 
 [params.logo]

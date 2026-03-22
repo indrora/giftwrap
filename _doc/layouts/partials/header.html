@@ -1,0 +1,23 @@
+<header class="header">
+  <div class="header__inner">
+    <div class="header__logo">
+      {{ partial "logo.html" . }}
+    </div>
+    {{ with $.Site.Params.githubRepo }}
+    <div class="header__endcap">
+      <a href="{{ . }}" class="header__endcap" title="GitHub">GitHub</a>
+      &middot;
+      <a href="{{ . }}/issues" class="header__endcap" title="Issues">Issues</a>
+    </div>
+    {{ end }}
+    {{ if len $.Site.Menus }}
+      {{ partial "mobile-menu.html" . }}
+    {{ end }}
+    {{ if and $.Site.Params.showLanguageSelector (len $.Site.Home.AllTranslations) }}
+      {{ partial "language-menu.html" . }}
+    {{ end }}
+  </div>
+  {{ if len $.Site.Menus }}
+    {{ partial "menu.html" . }}
+  {{ end }}
+</header>

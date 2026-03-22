@@ -1,3 +1,11 @@
+.header__endcap {
+    position: relative;
+    align-self: baseline;
+    margin-left: 1em;
+    align-content: baseline;
+    height: 100%;
+}
+
 dt {
   font-weight: bold;
   margin-top: 1em;
