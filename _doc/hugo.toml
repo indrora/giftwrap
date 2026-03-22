@@ -4,8 +4,17 @@ title = "giftwrap"
 theme = "terminal"
 pagination.pagerSize = 10
 
+
+
+[markup]
+[markup.goldmark]
+[markup.goldmark.parser]
+wrapStandAloneImageWithinParagraph = false
+[markup.goldmark.parser.attribute]
+block = true
+title = true
 [markup.goldmark.extensions]
-  definitionList = true
+definitionList = true
 
 [markup.highlight]
 noClasses = false
@@ -18,12 +27,12 @@ noClasses = false
   themeColor = "green"
   showLanguageSelector = false
   subtitle = "Wrap your go packages with a gentle kiss."
-  showLastUpdated = true 
+  showLastUpdated = true
   updateDatePrefix = "last update:"
-  Toc = true 
+  Toc = true
   owner = "indrora"
   githubRepo = "https://github.com/indrora/giftwrap"
-  
+
 
 [params.logo]
   logoText = "giftwrap"
@@ -46,4 +55,3 @@ noClasses = false
   name = "CLI"
   url = "/docs/cli/"
   weight = 3
-

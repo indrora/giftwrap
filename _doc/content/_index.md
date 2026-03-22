@@ -2,6 +2,9 @@
 title: "giftwrap"
 ---
 
+![Giftwrap logo](full.png)
+{class="bodylogo" srcset="full.png 1x, full@2x.png 2x"}
+
 **giftwrap** cross-compiles Go applications for multiple OS/architecture targets and packages release archives. You define targets in a YAML config file; giftwrap handles the rest.
 
 ```yaml

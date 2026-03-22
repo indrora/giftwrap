@@ -1,5 +1,5 @@
 * {
-    font-family: 'B612 Mono', monospace !important;
+    font-family: "B612 Mono", monospace !important;
 }
 
 .header__endcap {
@@ -11,11 +11,18 @@
 }
 
 dt {
-  font-weight: bold;
-  margin-top: 1em;
+    font-weight: bold;
+    margin-top: 1em;
 }
 
 dd {
-  margin-left: 1.5rem;
-  margin-bottom: 0.25em;
+    margin-left: 1.5rem;
+    margin-bottom: 0.25em;
+}
+
+.bodylogo {
+    border: none;
+    margin-left: 2em;
+    margin-right: 2em;
+    height: auto;
 }
