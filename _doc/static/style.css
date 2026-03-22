@@ -1,3 +1,7 @@
+* {
+    font-family: 'B612 Mono', monospace !important;
+}
+
 .header__endcap {
     position: relative;
     align-self: baseline;
