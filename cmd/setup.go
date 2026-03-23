@@ -36,10 +36,6 @@ func LoadProject(cmd *cobra.Command, args []string) error {
 
 var globalRunnerOpts runner.Options
 
-func init() {
-
-}
-
 const (
 	StdoutLevel = log.WarnLevel
 	StderrLevel = log.ErrorLevel

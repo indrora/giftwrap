@@ -12,7 +12,7 @@ type PrintRunner struct {
 	logger *log.Logger
 }
 
-func NewPrintRuner(l *log.Logger) *PrintRunner {
+func NewPrintRunner(l *log.Logger) *PrintRunner {
 	return &PrintRunner{logger: l}
 }
 

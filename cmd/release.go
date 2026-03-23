@@ -4,7 +4,6 @@ Copyright © 2026 Morgan Gangwere <morgan.gangwere@gmail.com>
 package cmd
 
 import (
-	"github.com/charmbracelet/log"
 	"github.com/indrora/giftwrap/internal/builder"
 	"github.com/indrora/giftwrap/internal/packager"
 	"github.com/indrora/giftwrap/internal/runner"
@@ -68,7 +67,7 @@ func doRelease(cmd *cobra.Command, args []string) {
 		rootLogger.Fatal("failed post-exec", "err", err)
 	}
 
-	log.Print("Finished!")
+	rootLogger.Print("Finished!")
 }
 
 var releaseShell *string

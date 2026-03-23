@@ -4,7 +4,6 @@ Copyright © 2026 Morgan Gangwere <morgan.gangwere@gmail.com>
 package cmd
 
 import (
-	"github.com/charmbracelet/log"
 	"github.com/indrora/giftwrap/internal/builder"
 	"github.com/indrora/giftwrap/internal/runner"
 	"github.com/spf13/cobra"
@@ -64,7 +63,7 @@ func doBuild(cmd *cobra.Command, args []string) {
 		rootLogger.Fatal("failed post-exec")
 	}
 
-	log.Print("Finished!")
+	rootLogger.Print("Finished!")
 
 }
 
@@ -72,15 +71,5 @@ var shell *string
 
 func init() {
 	rootCmd.AddCommand(buildCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// buildCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// buildCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	shell = buildCmd.Flags().String("shell", "", "Specify the shell to use for building")
 }
