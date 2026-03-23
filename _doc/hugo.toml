@@ -16,6 +16,12 @@ title = true
 [markup.goldmark.extensions]
 definitionList = true
 
+[markup.tableOfContents]
+    endLevel = 3
+    ordered = false
+    startLevel = 1
+
+
 [markup.highlight]
 noClasses = false
 

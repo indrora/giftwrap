@@ -3,7 +3,7 @@ title: "giftwrap(1)"
 draft: false
 ---
 
-## Synopsis
+# Synopsis
 
 **giftwrap** — cross-compile Go applications and package releases.
 
@@ -12,26 +12,26 @@ multiple operating systems and architectures at a time.
 
 Additionally, it packages releases for you.
 
-## Usage
+# Usage
 
     giftwrap [--wrapfile path] [--log-level level] <command> [options]
 
 Available commands:
 
-    build        Build the project
-    clean        Clean build and release artifacts
-    init         Initialize a project
-    release      Build and package project variants into release archives
+* **`build`**: Build the project
+* **`clean`**: Clean build and release artifacts
+* **`init`**: Initialize a project
+* **`release`**: Build and package project variants into release archives
 
-## Global Options
+# Global Options
 
     -h, --help               Print help
         --log-level string   Log level to use (debug, info, warn, error) (default: info)
         --wrapfile string    Path to the .wrapfile in use
 
-## Commands
+# Commands
 
-### build — Build the project
+## build — Build the project {#cmd_build}
 
 build compiles each configured target variant for the specified GOOS/GOARCH pairs. If no target name is given, the default target is used.
 
@@ -41,13 +41,13 @@ build compiles each configured target variant for the specified GOOS/GOARCH pair
 
 ---
 
-### clean — Clean build and release artifacts
+## clean — Clean build and release artifacts {#cmd_clean}
 
 clean removes the build directory (_build) and the distribution directory (_dist).
 
 ---
 
-### init — Initialize a project
+## init — Initialize a project {#cmd_init}
 
 Initialize a giftwrap project. This will attempt to find
 a go.mod in the current file. If this does not exist, it will stop.
@@ -58,7 +58,7 @@ a go.mod in the current file. If this does not exist, it will stop.
 
 ---
 
-### release — Build and package project variants into release archives
+## release — Build and package project variants into release archives {#cmd_release}
 
 release builds each configured target variant and packages the output into archives in the distribution directory.
 
@@ -67,9 +67,9 @@ release builds each configured target variant and packages the output into archi
         --shell string   Specify the shell to use for building
 
 
-## Remarks
+# Remarks
 
-### Configuration file search order
+## Configuration file search order
 
 giftwrap looks for a configuration file in the following locations, in order
 (first match wins):
@@ -82,7 +82,7 @@ giftwrap looks for a configuration file in the following locations, in order
 
 Pass `--wrapfile <path>` to override the search and use a specific file.
 
-### Environment variables
+## Environment variables
 
 giftwrap sets the following environment variables when running pre/post exec hooks
 and `go build`:
@@ -91,3 +91,7 @@ and `go build`:
     GOARCH      Target architecture
     BUILD_TARGET   Name of the target being built (e.g. "default")
     BUILD_DIR      Root of the build output directory
+
+# License
+
+Giftwrap is licensed under the terms of the MIT license.

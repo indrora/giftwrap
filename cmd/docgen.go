@@ -8,8 +8,8 @@
 package cmd
 
 import (
-	_ "embed"
 	"bytes"
+	_ "embed"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -47,7 +47,7 @@ func runDocgen(cmd *cobra.Command, args []string) {
 	buf.WriteString("---\ntitle: \"giftwrap(1)\"\ndraft: false\n---\n\n")
 
 	// Synopsis
-	buf.WriteString("## Synopsis\n\n")
+	buf.WriteString("# Synopsis\n\n")
 	buf.WriteString("**giftwrap** — cross-compile Go applications and package releases.\n\n")
 	if long := normalizeLong(root.Long); long != "" {
 		buf.WriteString(long)
@@ -55,25 +55,25 @@ func runDocgen(cmd *cobra.Command, args []string) {
 	}
 
 	// Usage
-	buf.WriteString("## Usage\n\n")
+	buf.WriteString("# Usage\n\n")
 	buf.WriteString("    giftwrap [--wrapfile path] [--log-level level] <command> [options]\n\n")
 	visible := docgenVisibleCmds(root)
 	buf.WriteString("Available commands:\n\n")
 	for _, c := range visible {
-		fmt.Fprintf(&buf, "    %-12s %s\n", c.Name(), c.Short)
+		fmt.Fprintf(&buf, "* **`%s`**: %s\n", c.Name(), c.Short)
 	}
 	buf.WriteString("\n")
 
 	// Global Options
-	buf.WriteString("## Global Options\n\n")
+	buf.WriteString("# Global Options\n\n")
 	helpEntry := docgenFlagEntry{left: "-h, --help", right: "Print help"}
 	buf.WriteString(docgenRenderEntries(append([]docgenFlagEntry{helpEntry}, docgenFlagEntries(root.PersistentFlags())...)))
 	buf.WriteString("\n")
 
 	// Commands
-	buf.WriteString("## Commands\n\n")
+	buf.WriteString("# Commands\n\n")
 	for i, c := range visible {
-		fmt.Fprintf(&buf, "### %s — %s\n\n", c.Name(), c.Short)
+		fmt.Fprintf(&buf, "## %s — %s {#%s}\n\n", c.Name(), c.Short, "cmd_"+c.Name())
 		if long := normalizeLong(c.Long); long != "" {
 			buf.WriteString(long)
 			buf.WriteString("\n\n")
@@ -90,7 +90,7 @@ func runDocgen(cmd *cobra.Command, args []string) {
 
 	// Remarks
 	if remarks := strings.TrimSpace(string(docgenRemarks)); remarks != "" {
-		buf.WriteString("\n## Remarks\n\n")
+		buf.WriteString("\n# Remarks\n\n")
 		buf.WriteString(remarks)
 		buf.WriteString("\n")
 	}

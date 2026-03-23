@@ -1,4 +1,5 @@
-### Configuration file search order
+
+## Configuration file search order
 
 giftwrap looks for a configuration file in the following locations, in order
 (first match wins):
@@ -11,7 +12,7 @@ giftwrap looks for a configuration file in the following locations, in order
 
 Pass `--wrapfile <path>` to override the search and use a specific file.
 
-### Environment variables
+## Environment variables
 
 giftwrap sets the following environment variables when running pre/post exec hooks
 and `go build`:
@@ -20,3 +21,7 @@ and `go build`:
     GOARCH      Target architecture
     BUILD_TARGET   Name of the target being built (e.g. "default")
     BUILD_DIR      Root of the build output directory
+
+# License
+
+Giftwrap is licensed under the terms of the MIT license.
