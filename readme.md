@@ -69,9 +69,9 @@ targets:
 The docs site lives in `_doc/` and is built with [Hugo](https://gohugo.io). CLI reference pages are generated from the Cobra command tree.
 
 ```
-go run ./tools/docgen       # regenerate _doc/content/docs/cli.md
-cd _doc && hugo server      # preview locally
-cd _doc && hugo --minify    # production build
+go run -tags docgen . docgen   # regenerate _doc/content/docs/cli.md
+cd _doc && hugo server         # preview locally
+cd _doc && hugo --minify       # production build
 ```
 
 Run `go run ./tools/docgen` after any change to command flags or descriptions.

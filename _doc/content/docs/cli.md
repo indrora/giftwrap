@@ -1,143 +1,93 @@
 ---
-title: "CLI Reference"
+title: "giftwrap(1)"
 draft: false
 ---
 
-## giftwrap
+## Synopsis
 
-A tool to build Go applications
-
-### Synopsis
+**giftwrap** — cross-compile Go applications and package releases.
 
 Giftwrap is a tool to build Go applications for
-	multiple operating systems and architectures at a time.
+multiple operating systems and architectures at a time.
 
-	Additionally, it packages releases for you.
+Additionally, it packages releases for you.
 
-```
-giftwrap [flags]
-```
+## Usage
 
-### Options
+    giftwrap [--wrapfile path] [--log-level level] <command> [options]
 
-```
-  -h, --help               help for giftwrap
-      --log-level string   Log level to use (debug, info, warn, error) (default "info")
-      --wrapfile string    Path to the .wrapfile in use
-```
+Available commands:
 
+    build        Build the project
+    clean        Clean build and release artifacts
+    init         Initialize a project
+    release      Build and package project variants into release archives
 
----
+## Global Options
 
-## giftwrap build
+    -h, --help               Print help
+        --log-level string   Log level to use (debug, info, warn, error) (default: info)
+        --wrapfile string    Path to the .wrapfile in use
 
-Build the project
+## Commands
 
-### Synopsis
+### build — Build the project
 
 build compiles each configured target variant for the specified GOOS/GOARCH pairs. If no target name is given, the default target is used.
 
-```
-giftwrap build [flags]
-```
+**Options:**
 
-### Options
-
-```
-  -h, --help           help for build
-      --shell string   Specify the shell to use for building
-```
-
-### Options inherited from parent commands
-
-```
-      --log-level string   Log level to use (debug, info, warn, error) (default "info")
-      --wrapfile string    Path to the .wrapfile in use
-```
-
+        --shell string   Specify the shell to use for building
 
 ---
 
-## giftwrap clean
+### clean — Clean build and release artifacts
 
-Clean build and release artifacts
-
-```
-giftwrap clean [flags]
-```
-
-### Options
-
-```
-  -h, --help   help for clean
-```
-
-### Options inherited from parent commands
-
-```
-      --log-level string   Log level to use (debug, info, warn, error) (default "info")
-      --wrapfile string    Path to the .wrapfile in use
-```
-
+clean removes the build directory (_build) and the distribution directory (_dist).
 
 ---
 
-## giftwrap init
-
-Initialize a project
-
-### Synopsis
+### init — Initialize a project
 
 Initialize a giftwrap project. This will attempt to find
 a go.mod in the current file. If this does not exist, it will stop.
 
-```
-giftwrap init [flags]
-```
+**Options:**
 
-### Options
-
-```
-  -h, --help             help for init
-      --modpath string   Path to go.mod file (default "go.mod")
-```
-
-### Options inherited from parent commands
-
-```
-      --log-level string   Log level to use (debug, info, warn, error) (default "info")
-      --wrapfile string    Path to the .wrapfile in use
-```
-
+        --modpath string   Path to go.mod file (default: go.mod)
 
 ---
 
-## giftwrap release
-
-Build and package project variants into release archives
-
-### Synopsis
+### release — Build and package project variants into release archives
 
 release builds each configured target variant and packages the output into archives in the distribution directory.
 
-```
-giftwrap release [flags]
-```
+**Options:**
 
-### Options
-
-```
-  -h, --help           help for release
-      --shell string   Specify the shell to use for building
-```
-
-### Options inherited from parent commands
-
-```
-      --log-level string   Log level to use (debug, info, warn, error) (default "info")
-      --wrapfile string    Path to the .wrapfile in use
-```
+        --shell string   Specify the shell to use for building
 
 
----
+## Remarks
 
+### Configuration file search order
+
+giftwrap looks for a configuration file in the following locations, in order
+(first match wins):
+
+    .wrapfile
+    giftwrap.yml
+    .github/giftwrap.yml
+    .github/.wrapfile
+    .giftwrap.yml
+
+Pass `--wrapfile <path>` to override the search and use a specific file.
+
+### Environment variables
+
+giftwrap sets the following environment variables when running pre/post exec hooks
+and `go build`:
+
+    GOOS        Target operating system
+    GOARCH      Target architecture
+    BUILD_TARGET   Name of the target being built (e.g. "default")
+    BUILD_DIR      Root of the build output directory

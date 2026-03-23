@@ -29,8 +29,9 @@ import (
 
 // cleanCmd represents the clean command
 var cleanCmd = &cobra.Command{
-	Use:     "clean",
-	Short:   "Clean build and release artifacts",
+	Use:   "clean",
+	Short: "Clean build and release artifacts",
+	Long:  `clean removes the build directory (_build) and the distribution directory (_dist).`,
 	PreRunE: LoadProject,
 
 	Run: runClean,
