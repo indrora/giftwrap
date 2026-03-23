@@ -26,7 +26,7 @@ func doRelease(cmd *cobra.Command, args []string) {
 
 	run := runner.NewExecRunner(rootLogger)
 
-	b, err := builder.NewBuilder(*globProject, *run, globalRunnerOpts)
+	b, err := builder.NewBuilder(*globProject, run, globalRunnerOpts)
 	if err != nil {
 		rootLogger.Fatal("failed setting up builder", "err", err)
 	}
