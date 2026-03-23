@@ -19,17 +19,14 @@ func (f *MultiString) UnmarshalYAML(node *yaml.Node) error {
 	switch node.Kind {
 	case yaml.ScalarNode:
 		*f = []string{node.Value}
+	case yaml.SequenceNode:
+		items := make([]string, len(node.Content))
+		for i, n := range node.Content {
+			items[i] = n.Value
+		}
+		*f = items
 	case yaml.MappingNode:
-		// Decode as a plain struct using a local alias to avoid recursion
-		items := []string{}
-		if err := node.Decode(items); err != nil {
-			return fmt.Errorf("MultiString: Failed decode: %w", err)
-		}
-		if len(items) > 0 {
-			*f = items
-		} else {
-			*f = []string{} // Empty list if there is no value
-		}
+		return fmt.Errorf("MultiString: cannot unmarshal a mapping into a string list")
 	default:
 		return fmt.Errorf("MultiString: cannot unmarshal %v into list", node.Kind)
 	}
