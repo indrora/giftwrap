@@ -40,12 +40,6 @@ var cleanCmd = &cobra.Command{
 func runClean(cmd *cobra.Command, args []string) {
 	rootLogger.Info("Cleaning begins")
 
-	// Clean the contents of the build dir by blowing it away
-	if globProject == nil {
-		rootLogger.Error("Project not loaded; cannot clean build/dist directories")
-		return
-	}
-
 	rootLogger.Info("Attempting to remove build directory", "dir", globProject.BuildDir)
 	if err := os.RemoveAll(globProject.BuildDir); err != nil {
 		rootLogger.Error("Failed to remove build directory", "dir", globProject.BuildDir, "err", err)
