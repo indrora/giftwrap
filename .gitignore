@@ -3,4 +3,10 @@ _build/**
 _dist/**
 _doc/public/**
 _doc/.hugo_build.lock
+
+
+# There's occasionally some binaries around...
+giftwrap
+giftwrap.exe
 docgen
+docgen.exe
