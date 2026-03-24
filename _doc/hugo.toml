@@ -1,4 +1,5 @@
-baseurl = "/"
+# This gets filled in by Github build
+baseurl = ""
 languageCode = "en-us"
 title = "giftwrap"
 theme = "terminal"
@@ -30,7 +31,6 @@ noClasses = false
   showMenuItems = 3
   fullWidthTheme = false
   centerTheme = true
-  themeColor = "green"
   showLanguageSelector = false
   subtitle = "Wrap your go packages with a gentle kiss."
   showLastUpdated = true
@@ -40,9 +40,9 @@ noClasses = false
   githubRepo = "https://github.com/indrora/giftwrap"
 
 
+# no need to include a URL -> This will become the baseURL
 [params.logo]
   logoText = "giftwrap"
-  logoHomeLink = "/"
 
 [[menu.main]]
   identifier = "quickstart"
