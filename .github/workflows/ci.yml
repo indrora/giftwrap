@@ -1,0 +1,27 @@
+name: Build for CI
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: "build"
+defaults:
+  run:
+    shell: bash
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: "go.mod"
+          cache-dependency-path: "go.sum"
+          token: ${{github.token}}
+      - run: go test ./...
+        name: "Run tests"
+      - run: go build .
+        name: "Build executable"
