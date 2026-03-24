@@ -4,6 +4,7 @@ import (
 	"errors"
 	"maps"
 
+	sh "github.com/indrora/giftwrap/internal/shell"
 	"github.com/indrora/giftwrap/internal/types"
 )
 
@@ -23,7 +24,7 @@ type Project struct {
 	Exec *BuildCmds `yaml:"exec,omitempty"`
 	// Shell configures which shell to use per OS when running pre/post commands.
 	// See ShellConfig for resolution order and YAML format.
-	Shell ShellConfig `yaml:"shell,omitempty"`
+	Shell sh.ShellConfig `yaml:"shell,omitempty"`
 	// Directory to place build artifacts
 	BuildDir       string            `yaml:"buildPath,omitempty"`      // defaults to "_build"
 	DistDir        string            `yaml:"distPath,omitempty"`       // defaults to "_dist"

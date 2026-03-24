@@ -3,10 +3,10 @@ package runner
 import (
 	"fmt"
 	"os/exec"
-	"runtime"
 	"strings"
 
 	"github.com/charmbracelet/log"
+	sh "github.com/indrora/giftwrap/internal/shell"
 )
 
 type ExecRunner struct {
@@ -22,11 +22,8 @@ func (r ExecRunner) Run(cmd string, options Options) error {
 	r.logger.Debug("Running command", "cmd", cmd, "options", options)
 	shell := options.Shell
 	if shell == "" {
-		if runtime.GOOS == "windows" {
-			shell = "cmd /c"
-		} else {
-			shell = "sh -c"
-		}
+		// When no shell is defined, use the local shell from the host.
+		shell = sh.DefaultShell
 	}
 	parts := strings.Fields(shell)
 	return r.RunArgs(parts[0], append(parts[1:], cmd), options)

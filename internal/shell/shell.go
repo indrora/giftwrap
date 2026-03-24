@@ -1,6 +1,8 @@
-package project
+package shell
 
 import "runtime"
+
+const DefaultShell string = _DEFAULT_SHELL
 
 // ShellConfig maps OS names to shell invocation strings used when running
 // pre/post commands. The map keys are runtime.GOOS values or the special
