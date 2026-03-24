@@ -10,3 +10,7 @@ giftwrap
 giftwrap.exe
 docgen
 docgen.exe
+
+# Don't commit the docgen generated content
+
+_doc/content/docs/cli.md

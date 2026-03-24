@@ -35,7 +35,7 @@ jobs:
       - name: Setup Hugo
         uses: peaceiris/actions-hugo@v3
         with:
-          hugo-version: 'latest'
+          hugo-version: "latest"
           extended: true
       - name: Install Dart Sass
         run: sudo snap install dart-sass
@@ -50,8 +50,8 @@ jobs:
         with:
           go-version-file: go.mod
           token: ${{ github.token }}
-          cache-dependency-path: 'go.sum'
-      - run: go run -t docgen . docgen
+          cache-dependency-path: "go.sum"
+      - run: go run -tags docgen . docgen
       # Build the pages
       - name: Setup Pages
         id: pages
