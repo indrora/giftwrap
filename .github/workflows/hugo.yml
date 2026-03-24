@@ -5,6 +5,8 @@ on:
   # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
+    paths: "_doc/**"
+  tags: v*.*.*
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -50,7 +52,7 @@ jobs:
         with:
           go-version-file: go.mod
           token: ${{ github.token }}
-          cache-dependency-path: "go.sum"
+          cache-dependency-path: go.sum
       - run: go run -tags docgen . docgen
       # Build the pages
       - name: Setup Pages
