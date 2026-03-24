@@ -15,11 +15,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # Get the repo
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
-          go-version-file: "go.mod"
-          cache-dependency-path: "go.sum"
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
           token: ${{github.token}}
       - run: go test ./...
         name: "Run tests"
