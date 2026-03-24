@@ -1,5 +1,9 @@
 # giftwrap
 
+![logo](_art/full@2x.png)
+
+[![Build for CI](https://github.com/indrora/giftwrap/actions/workflows/ci.yml/badge.svg)](https://github.com/indrora/giftwrap/actions/workflows/ci.yml)
+
 `giftwrap` cross-compiles Go applications for multiple OS/architecture targets and packages releases. It reads a project config file (a *wrapfile*), runs pre/post build hooks, sets environment variables, and invokes `go build` for each target you define.
 
 ## Building
