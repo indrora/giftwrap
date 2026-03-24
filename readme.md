@@ -25,6 +25,9 @@ giftwrap searches for a config file in this order:
 
 Pass `--wrapfile <path>` to use a specific file.
 
+This tool is compatible with `go tool`: `go get -tool github.com/indrora/giftwrap@latest`.
+Use it with `go tool giftwrap`. 
+
 ## Example wrapfile
 
 ```yaml
@@ -74,7 +77,7 @@ cd _doc && hugo server         # preview locally
 cd _doc && hugo --minify       # production build
 ```
 
-Run `go run ./tools/docgen` after any change to command flags or descriptions.
+Run `go run -tags docgen . docgen` after any change to command flags or descriptions.
 
 ## Architecture
 
