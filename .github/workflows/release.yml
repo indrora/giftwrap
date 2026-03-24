@@ -2,13 +2,12 @@ name: Release
 on:
   push:
     tags: v*.*.*
-    branches:
-      - main
 defaults:
   run:
     shell: bash
 jobs:
   build:
+    if: ${{github.ref_name == "main" }}
     runs-on: ubuntu-latest
     steps:
       # Get the repo
