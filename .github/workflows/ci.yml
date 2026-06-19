@@ -1,22 +1,28 @@
-name: Build for CI
+name: CI
 
 on:
   push:
     branches: ["main"]
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
   pull_request:
   workflow_dispatch:
+
+# Least privilege by default; the release job opts into write access.
 permissions:
-  contents: write
+  contents: read
+
 concurrency:
-  group: "build"
+  group: ${{ github.workflow }}-${{ github.ref }}
+
 defaults:
   run:
     shell: bash
+
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
-      # Get the repo
       - name: Checkout
         uses: actions/checkout@v6
         with:
@@ -27,9 +33,58 @@ jobs:
           go-version-file: go.mod
           cache-dependency-path: go.sum
           token: ${{github.token}}
-      - run: go test ./...
-        name: "Run tests"
-      - run: go build .
-        name: "Build executable"
-      - name: "Verify doc gen"
+      - name: Run tests
+        run: go test ./...
+      - name: Build executable
+        run: go build .
+      - name: Verify doc gen
         run: go run -tags docgen . docgen
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          fetch-depth: 0
+          fetch-tags: true
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+          token: ${{github.token}}
+      - name: Eat the dogfood.
+        run: go run . build
+      - name: Package the dogfood
+        run: go run . release
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: |
+            _dist/*.zip
+            _dist/*.tar.gz
+
+  # Only release when a version tag is pushed; PRs and main pushes stop after build.
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: _dist
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            _dist/*.zip
+            _dist/*.tar.gz
